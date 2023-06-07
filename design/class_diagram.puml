@@ -1,0 +1,66 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+class MutationTestingPipeline {
+    + metrics
+    + test(model, dataframe, protected_attributes, metrics, operators)
+}
+
+abstract class Operator #D0F1FA{
+    + computeMutation(dataframe)
+}
+
+abstract class Model #FEA29C{
+    + predict(dataframes)
+}
+
+abstract class Metric {
+    + computeMetric(predictions, y_real)
+}
+
+class MutantGenerator {
+    + operators
+    + generateMutantDataset(dataframe)
+}
+
+class TensorflowModel #FE5F55{
+    + predict(dataframes)
+}
+
+class SKLearnModel #FE5F55{
+    + predict(dataframes)
+}
+
+class ColumnShuffle #7EE8FA{
+    + computeMutation(dataframe)
+}
+
+class Redistribution #7EE8FA{
+    + computeMutation(dataframe)
+}
+
+class ColumnDropping #7EE8FA{
+    + computeMutation(dataframe)
+}
+
+class MutantDuplicate #7EE8FA{
+    + computeMutation(dataframe)
+}
+
+MutationTestingPipeline -l-> Model
+MutationTestingPipeline -u-> Metric
+
+SKLearnModel --|> Model
+TensorflowModel -u-|> Model
+
+ColumnShuffle -|> Operator
+Redistribution -u-|> Operator
+ColumnDropping -u-|> Operator
+MutantDuplicate -u-|> Operator
+
+MutantGenerator --> Operator
+
+MutationTestingPipeline -d-> MutantGenerator
+
+@enduml
