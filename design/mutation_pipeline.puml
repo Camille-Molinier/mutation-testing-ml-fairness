@@ -12,10 +12,10 @@ participant SKLearnModel #FE5F55
 participant Metric #3C896D
 
 client -> FairnessMutationTestingPipeline : test(model, dataframe, protected_attributes, metrics, operators)
-FairnessMutationTestingPipeline -> MutantGenerator : generateMutantDataset(dataframe)
-MutantGenerator ->  Operator1 : computeMutation(dataframe)
+FairnessMutationTestingPipeline -> MutantGenerator : generate_mutant_dataset(dataframe, protected_attributes)
+MutantGenerator ->  Operator1 : compute_mutation(dataframe, protected_attributes)
 MutantGenerator <-- Operator1 : muted_dataframe
-MutantGenerator ->  Operator2 : computeMutation(dataframe)
+MutantGenerator ->  Operator2 : compute_mutation(dataframe, protected_attributes)
 MutantGenerator <-- Operator2 : muted_dataframe
 FairnessMutationTestingPipeline <-- MutantGenerator : dataframes
 
@@ -23,7 +23,7 @@ FairnessMutationTestingPipeline <-- MutantGenerator : dataframes
 FairnessMutationTestingPipeline ->  SKLearnModel : predict(dataframes)
 FairnessMutationTestingPipeline <-- SKLearnModel : predictions
 
-FairnessMutationTestingPipeline -> Metric : computeMetric(predictions, y_real)
+FairnessMutationTestingPipeline -> Metric : compute_metric(predictions, y_real)
 FairnessMutationTestingPipeline <-- Metric : results
 
 FairnessMutationTestingPipeline --> client : final_results

@@ -8,7 +8,8 @@ class MutationTestingPipeline {
 }
 
 abstract class Operator #D0F1FA{
-    + computeMutation(dataframe)
+    + dataframe
+    + compute_mutation()
 }
 
 abstract class Model #FEA29C{
@@ -16,12 +17,12 @@ abstract class Model #FEA29C{
 }
 
 abstract class Metric {
-    + computeMetric(predictions, y_real)
+    + compute_metric(predictions, y_real)
 }
 
 class MutantGenerator {
     + operators
-    + generateMutantDataset(dataframe)
+    + generate_mutant_dataset(dataframe)
 }
 
 class TensorflowModel #FE5F55{
@@ -33,19 +34,22 @@ class SKLearnModel #FE5F55{
 }
 
 class ColumnShuffle #7EE8FA{
-    + computeMutation(dataframe)
+    + shuffle_ratio
+    + compute_mutation(dataframe)
 }
 
 class Redistribution #7EE8FA{
-    + computeMutation(dataframe)
+    + compute_mutation(dataframe)
 }
 
 class ColumnDropping #7EE8FA{
-    + computeMutation(dataframe)
+    + dropping_ratio
+    + compute_mutation(dataframe)
 }
 
 class MutantDuplicate #7EE8FA{
-    + computeMutation(dataframe)
+    + duplicate_ratio
+    + compute_mutation(dataframe)
 }
 
 MutationTestingPipeline -l-> Model
