@@ -33,7 +33,35 @@ class ColumnShuffleOperatorTest(unittest.TestCase):
     def test_correct_shuffle_value_with_empty_constructor(self):
         self.assertEqual(0, ColumnShuffle().shuffle_ratio)
 
-    def test_computatation_doing_something(self):
+    def test_not_dataframe_parameter(self):
+        with self.assertRaises(AssertionError):
+            self.operator.compute_mutation('loutre', ['col3'])
+
+    def test_not_list_of_string_parameter(self):
+        with self.assertRaises(AssertionError):
+            self.operator.compute_mutation(self.df, self.df)
+
+    def test_list_of_non_str_elements(self):
+        with self.assertRaises(AssertionError):
+            self.operator.compute_mutation(self.df, [self.df])
+
+    def test_list_of_mixed_str_elements(self):
+        with self.assertRaises(AssertionError):
+            self.operator.compute_mutation(self.df, [self.df])
+
+    def test_list_of_mixed_str_elements2(self):
+        with self.assertRaises(AssertionError):
+            self.operator.compute_mutation(self.df, ['col2', 'otter'])
+
+    def test_list_of_mixed_str_elements3(self):
+        with self.assertRaises(AssertionError):
+            self.operator.compute_mutation(self.df, [0.5])
+
+    def test_list_elements_are_in_dataframe_columns(self):
+        with self.assertRaises(AssertionError):
+            self.operator.compute_mutation(self.df, ['col4'])
+
+    def test_computation_doing_something(self):
         shuffled = self.operator.compute_mutation(self.df, ['col3'])
         self.assertFalse(self.df['col3'].equals(shuffled['col3']))
 
