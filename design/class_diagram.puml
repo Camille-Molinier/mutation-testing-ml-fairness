@@ -43,7 +43,6 @@ class Redistribution #7EE8FA{
 }
 
 class ColumnDropping #7EE8FA{
-    + dropping_ratio
     + compute_mutation(dataframe)
 }
 
