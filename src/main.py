@@ -1,12 +1,11 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from src.Operators import ColumnShuffle, ColumnDropping, Redistribution
+from src.Operators import column_shuffle, column_dropping, redistribution
 
 
 def main():
-    operator = Redistribution()
-    N_samples = 101
+    N_samples = 100000
     data = {
         'col1': np.random.randint(1, 100, size=N_samples),
         'col2': np.random.rand(N_samples),
@@ -14,13 +13,14 @@ def main():
     }
 
     # Crée le dataframe
-    df = pd.read_csv('../datasets/compas-scores-two-years.csv')
-    df_mutated = operator.compute_mutation(df, ['race'])
+    df = pd.DataFrame(data)
+    df_mutated = redistribution(df, ['col2'])
 
+    print(type(df_mutated['col2'][0]))
     plt.figure()
-    df['race'].value_counts().plot.pie()
+    df['col2'].value_counts().plot.pie()
     plt.figure()
-    df_mutated['race'].value_counts().plot.pie()
+    df_mutated['col2'].value_counts().plot.pie()
     plt.show()
 
 
