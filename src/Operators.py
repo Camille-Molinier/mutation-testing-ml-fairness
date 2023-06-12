@@ -6,7 +6,7 @@ import random
 ########################################################################################################################
 #                                               Column shuffle operator                                                #
 ########################################################################################################################
-def column_shuffle(dataframe, protected_attributes, shuffle_ratio=0, tol=0.1):
+def column_shuffle(dataframe, protected_attributes, shuffle_ratio=0.0, tol=0.1):
     assert type(dataframe) == pd.DataFrame, \
         'Type error: dataframe should be an instance of <pandas.core.frame.DataFrame>'
     assert isinstance(protected_attributes, list), 'Type error: protected_attributes should be an instance of list'
@@ -22,22 +22,24 @@ def column_shuffle(dataframe, protected_attributes, shuffle_ratio=0, tol=0.1):
     # copy dataframe to manipulate it safely
     df = dataframe.copy()
 
-    # run through protected attributes columns
-    for attribute in protected_attributes:
-        # compute number of row to shuffle
-        n_samples = int(len(df) * shuffle_ratio)
-        # choose n_samples random indexes
-        random_index = df.sample(n=n_samples).index.tolist()
+    if shuffle_ratio > 0:
 
-        # loop to reduce shuffle vanishing
-        ratio = 0
-        while ratio <= shuffle_ratio - tol:
-            # make a permutation of rows
-            shuffled = np.random.permutation(df.loc[random_index, attribute])
-            # replace in data
-            df.loc[random_index, 'col3'] = shuffled
-            # compute shuffle ratio
-            ratio = sum(df['col3'] != dataframe['col3']) / len(dataframe)
+        # run through protected attributes columns
+        for attribute in protected_attributes:
+            # compute number of row to shuffle
+            n_samples = int(len(df) * shuffle_ratio)
+            # choose n_samples random indexes
+            random_index = df.sample(n=n_samples).index.tolist()
+
+            # loop to reduce shuffle vanishing
+            ratio = 0
+            while ratio <= shuffle_ratio - tol:
+                # make a permutation of rows
+                shuffled = np.random.permutation(df.loc[random_index, attribute])
+                # replace in data
+                df.loc[random_index, 'col3'] = shuffled
+                # compute shuffle ratio
+                ratio = sum(df['col3'] != dataframe['col3']) / len(dataframe)
 
     return df
 
@@ -85,12 +87,10 @@ def redistribution(dataframe, protected_attributes):
 
         # if value are not string, convert to string and store type
         was_not_string = False
-        if type(df_col[0]) != str:
+        if not isinstance(df_col[0], str):
             was_not_string = True
             old_type = type(df_col[0])
             df_col = df_col.astype(str)
-
-        print(type(df_col[0]))
 
         # compute distribution
         distribution = df_col.value_counts()
@@ -120,10 +120,89 @@ def redistribution(dataframe, protected_attributes):
 
         # if data was not string, reconvert to ancient type
         if was_not_string:
-            print(old_type)
             copy = copy.astype(old_type)
 
         # replace dataframe column with balanced version
         df[col] = copy
+
+    return df
+
+
+########################################################################################################################
+#                                              Duplicate mutant operator                                               #
+########################################################################################################################
+def duplication_mutation(dataframe, protected_attributes, duplication_ratio=0.0):
+    assert type(dataframe) == pd.DataFrame, \
+        'Type error: dataframe should be an instance of <pandas.core.frame.DataFrame>'
+    assert isinstance(protected_attributes, list), 'Type error: protected_attributes should be an instance of list'
+    for attribute in protected_attributes:
+        assert isinstance(attribute, str), 'Type error: protected_attributes elements should be an instance of str'
+        assert attribute in dataframe.columns, \
+            'Key error: protected_attribute elements should be in dataframe columns'
+    assert type(duplication_ratio) == float, 'Type error: protected_attributes should be an instance of float'
+    assert 0 <= duplication_ratio <= 1, 'Value error: shuffle_ratio should be in range(0,1)'
+
+    # copy dataframe to manipulate it safely
+    df = dataframe.copy()
+
+    if duplication_ratio > 0:
+
+        # compute number of row to shuffle
+        n_samples = int(len(df) * duplication_ratio)
+        # choose n_samples random indexes
+        random_index = df.sample(n=n_samples).index.tolist()
+
+        # get sub dataframe for performance and run through rows
+        sub_df = df.loc[random_index]
+        for index in random_index:
+            for col in protected_attributes:
+                # copy column (pandas warning)
+                copy = sub_df[col].copy()
+                # get unique values
+                uniques = copy.unique().tolist()
+                # remove current value
+                uniques.remove(copy[index])
+                # replace with random value in uniques
+                copy[index] = uniques[np.random.randint(0, len(uniques) - 1)]
+                # replace column
+                sub_df[col] = copy
+
+        # add mutant subset to dataframe
+        df = pd.concat([df, sub_df])
+
+    return df
+
+
+########################################################################################################################
+#                                                  New class operator                                                  #
+########################################################################################################################
+def new_class(dataframe, protected_attributes, mutation_ratio=0.0):
+    assert type(dataframe) == pd.DataFrame, \
+        'Type error: dataframe should be an instance of <pandas.core.frame.DataFrame>'
+    assert isinstance(protected_attributes, list), 'Type error: protected_attributes should be an instance of list'
+    for attribute in protected_attributes:
+        assert isinstance(attribute, str), 'Type error: protected_attributes elements should be an instance of str'
+        assert attribute in dataframe.columns, \
+            'Key error: protected_attribute elements should be in dataframe columns'
+    assert type(mutation_ratio) == float, 'Type error: protected_attributes should be an instance of float'
+    assert 0 <= mutation_ratio <= 1, 'Value error: shuffle_ratio should be in range(0,1)'
+
+    # copy dataframe to manipulate it safely
+    df = dataframe.copy()
+
+    if mutation_ratio > 0:
+
+        # compute number of row to shuffle
+        n_samples = int(len(df) * mutation_ratio)
+        # choose n_samples random indexes
+        random_index = df.sample(n=n_samples).index.tolist()
+
+        for col in protected_attributes:
+            sub_df = df.loc[random_index]
+            if isinstance(sub_df[col][random_index[0]], str):
+                df.loc[random_index, col] = 'null'
+
+            else:
+                df.loc[random_index, col] = max(df[col]) + 1
 
     return df
