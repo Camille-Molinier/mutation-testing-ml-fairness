@@ -6,7 +6,7 @@ import random
 ########################################################################################################################
 #                                               Column shuffle operator                                                #
 ########################################################################################################################
-def column_shuffle(dataframe, protected_attribute, shuffle_ratio=0.0, tol=0.1) -> pd.DataFrame:
+def column_shuffle(dataframe, protected_attribute, shuffle_ratio=0.0) -> pd.DataFrame:
     """
     Column shuffling operator
 
@@ -22,9 +22,6 @@ def column_shuffle(dataframe, protected_attribute, shuffle_ratio=0.0, tol=0.1) -
     :param shuffle_ratio: float, default 0.0
         ratio of the data to mutate
 
-    :param tol: float, default 0.1
-        miss-shuffling ratio tolerance
-
     :return: pandas.Dataframe
         mutated dataset
     """
@@ -35,9 +32,7 @@ def column_shuffle(dataframe, protected_attribute, shuffle_ratio=0.0, tol=0.1) -
     assert protected_attribute in dataframe.columns, \
         'Key error: protected_attribute elements should be in dataframe columns'
     assert type(shuffle_ratio) == float, 'Type error: protected_attributes should be an instance of float'
-    assert type(tol) == float, 'Type error: protected_attributes should be an instance of float'
     assert 0 <= shuffle_ratio <= 1, 'Value error: shuffle_ratio should be in range(0,1)'
-    assert 0 <= tol <= 1, 'Value error: tol should be in range(0,1)'
 
     # copy dataframe to manipulate it safely
     df = dataframe.copy()
@@ -49,15 +44,10 @@ def column_shuffle(dataframe, protected_attribute, shuffle_ratio=0.0, tol=0.1) -
         # choose n_samples random indexes
         random_index = df.sample(n=n_samples).index.tolist()
 
-        # loop to reduce shuffle vanishing
-        ratio = 0
-        while ratio <= shuffle_ratio - tol:
-            # make a permutation of rows
-            shuffled = np.random.permutation(df.loc[random_index, protected_attribute])
-            # replace in data
-            df.loc[random_index, protected_attribute] = shuffled
-            # compute shuffle ratio
-            ratio = sum(df[protected_attribute] != dataframe[protected_attribute]) / len(dataframe)
+        # make a permutation of rows
+        shuffled = np.random.permutation(df.loc[random_index, protected_attribute])
+        # replace in data
+        df.loc[random_index, protected_attribute] = shuffled
 
     return df
 
@@ -91,7 +81,11 @@ def column_killing(dataframe, protected_attribute) -> pd.DataFrame:
     # make a copy for safe manipulation
     df = dataframe.copy()
 
-    df[protected_attribute] = pd.Series(df[protected_attribute].unique()[0], index=range(len(df)))
+    # get new value and replace all
+    new_value = df[protected_attribute].unique()[0]
+    df[protected_attribute] = pd.Series(new_value, index=range(len(df)))
+    # In case of non generation
+    df[protected_attribute].fillna(new_value, inplace=True)
 
     return df
 
@@ -128,9 +122,10 @@ def redistribution(dataframe, protected_attribute) -> pd.DataFrame:
 
     # if value are not string, convert to string and store type
     was_not_string = False
-    if not isinstance(df_col[0], str):
+
+    if not isinstance(df_col.iloc[0], str):
         was_not_string = True
-        old_type = type(df_col[0])
+        old_type = type(df_col.iloc[0])
         df_col = df_col.astype(str)
 
     # compute distribution
@@ -145,8 +140,8 @@ def redistribution(dataframe, protected_attribute) -> pd.DataFrame:
     # loop on rows and mark unchanged values
     unchanged = []
     for i in range(len(df_col)):
-        if optimal_distribution[df_col[i]] > 0:
-            optimal_distribution[df_col[i]] = optimal_distribution[df_col[i]] - 1
+        if optimal_distribution[df_col.iloc[i]] > 0:
+            optimal_distribution[df_col.iloc[i]] = optimal_distribution[df_col.iloc[i]] - 1
         else:
             unchanged.append(i)
 
@@ -157,7 +152,7 @@ def redistribution(dataframe, protected_attribute) -> pd.DataFrame:
 
     # place remaining value in unchanged indexes
     copy = df_col.copy()
-    copy.loc[unchanged] = rest_list
+    copy.iloc[unchanged] = rest_list
 
     # if data was not string, reconvert to ancient type
     if was_not_string:
