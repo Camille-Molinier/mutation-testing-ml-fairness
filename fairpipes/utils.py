@@ -3,7 +3,22 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def make_fig(history, title=""):
+def make_fig(history):
+    """
+    Make figure from simple pipeline assessment.
+
+    Show distributions for each operator with a combination of a boxplot and violinplot
+
+    .. image:: DT_01.png
+        :width: 500
+
+    :param history: dict
+        history from simple pipeline assessment
+
+    :return: None
+    """
+    assert isinstance(history, dict), 'TypeError: history parameter should be an instance of dict'
+
     names = list(history.keys())[1:]
     accuracies = [history[key]['accuracy'] for key in names]
     dpd = [history[key]['dpd'] for key in names]
@@ -31,6 +46,29 @@ def make_fig(history, title=""):
 
 
 def make_history_figs(history, mutations):
+    """
+        Make figure from simple pipeline assessment.
+
+        Show distributions for each operator with subplots.
+
+        Each subplot correspond to the average of a metric over all the iteration
+
+        .. image:: history_figs.png
+            :width: 500
+
+        :param history: list
+            histories from multiple mutations pipeline assessment
+
+        :param mutations: list
+            mutation ratios applied in pipeline
+
+        :return: None
+        """
+    assert isinstance(history, list), 'TypeError: history parameter should be an instance of list'
+    assert isinstance(mutations, list), 'TypeError: mutations parameter should be an instance of list'
+    for element in mutations:
+        assert isinstance(element, float), 'TypeError: mutations parameter elements should be instance of float'
+
     original = {'accuracy': [], 'dpd': [], 'eod': []}
     shuffle = {'accuracy': [], 'dpd': [], 'eod': []}
     killing = {'accuracy': [], 'dpd': [], 'eod': []}
@@ -87,14 +125,64 @@ def make_history_figs(history, mutations):
 
 
 def hist_to_dataframe(hist):
+    """
+    Convert history from basic pipeline to pandas dataFrame
+
+    :param hist: dict
+        basic pipeline result
+
+    :return: DataFrame
+        columns : metrics for each metrics
+        rows : values over all iterations
+    """
+    assert isinstance(hist, dict), 'TypeError: hist parameter should be an instance of dict'
+    # create empty list
     dfs = []
+    # run through all operators
     for key in hist:
+        # transpose dict to dataframe
         df = pd.DataFrame.from_dict(hist[key])
+        # rename column with <operator>_<metric>
         new_columns = {}
         for col in df.columns:
             new_columns[col] = f'{key}_{col}'
         df.rename(columns=new_columns, inplace=True)
         dfs.append(df)
 
+    # concat all dataframes in one
     result = pd.concat(dfs, axis=1)
+
+    return result
+
+
+def make_multi_hist_dataframe(histories, mutations):
+    """
+    Convert history from basic pipeline to pandas dataFrame
+
+    :param histories: list
+        histories returned from multiple mutations pipeline
+
+    :param mutations: list
+        mutation ration applied in pipeline
+
+    :return: DataFrame
+        columns : metrics for each metrics and mutation ratio
+        rows : values over all iterations
+    """
+    # create empty list
+    dfs = []
+
+    # run through histories
+    for i, hist in enumerate(histories):
+        # convert history to dataframe
+        df = hist_to_dataframe(hist)
+        # append columns names with corresponding mutation ration
+        new_columns = {}
+        for col in df.columns:
+            new_columns[col] = f'{mutations[i]}_{col}'
+        df.rename(columns=new_columns, inplace=True)
+        dfs.append(df)
+    # concatenate dataframes along columns
+    result = pd.concat(dfs, axis=1)
+
     return result

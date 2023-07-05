@@ -1,10 +1,7 @@
-import time
-start = time.time()
-
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from fairpipes.utils import make_history_figs, hist_to_dataframe
+from fairpipes.utils import make_history_figs, make_multi_hist_dataframe
 from fairpipes.pipelines import multi_mutation_fairness_assessment
 
 from sklearn.tree import DecisionTreeClassifier
@@ -29,12 +26,13 @@ def main():
     mutations = [0.1, 0.2, 0.3, 0.4, 0.5]
 
     hist = multi_mutation_fairness_assessment(model, X_test, y_test, protected_attribute='sex',
-                                              mutation_ratios=mutations, nb_iter=500, output_name='Adult_dt')
+                                              mutation_ratios=mutations, nb_iter=500)
 
     make_history_figs(hist, mutations)
+    result_df = make_multi_hist_dataframe(hist, mutations)
+    result_df.to_csv(f'./dat/exports/Adult_dt_2.csv')
 
     plt.show()
-    print(f'total time: {time.time() - start}')
 
 
 if __name__ == "__main__":

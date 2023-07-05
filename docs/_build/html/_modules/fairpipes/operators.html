@@ -201,7 +201,7 @@
 <span class="c1">########################################################################################################################</span>
 <span class="c1">#                                               Column shuffle operator                                                #</span>
 <span class="c1">########################################################################################################################</span>
-<div class="viewcode-block" id="column_shuffle"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.operators.column_shuffle">[docs]</a><span class="k">def</span> <span class="nf">column_shuffle</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">protected_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shuffle_ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="column_shuffle"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.operators.column_shuffle">[docs]</a><span class="k">def</span> <span class="nf">column_shuffle</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">,</span> <span class="n">shuffle_ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Column shuffling operator</span>
 
@@ -211,53 +211,38 @@
 
 <span class="sd">    :param dataframe: instance of pandas.DataFrame to compute mutation on</span>
 
-<span class="sd">    :param protected_attributes: list, default None</span>
-<span class="sd">        list with the protected attributes column names</span>
+<span class="sd">    :param protected_attribute: str</span>
+<span class="sd">        protected attributes column name</span>
 
 <span class="sd">    :param shuffle_ratio: float, default 0.0</span>
 <span class="sd">        ratio of the data to mutate</span>
 
-<span class="sd">    :param tol: float, default 0.1</span>
-<span class="sd">        miss-shuffling ratio tolerance</span>
-
 <span class="sd">    :return: pandas.Dataframe</span>
 <span class="sd">        mutated dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">protected_attributes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">protected_attributes</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> \
         <span class="s1">&#39;Type error: dataframe should be an instance of &lt;pandas.core.frame.DataFrame&gt;&#39;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attributes</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of list&#39;</span>
-    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
-        <span class="k">assert</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
-            <span class="s1">&#39;Key error: protected_attribute elements should be in dataframe columns&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> \
+        <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="n">protected_attribute</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
+        <span class="s1">&#39;Key error: protected_attribute elements should be in dataframe columns&#39;</span>
     <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">shuffle_ratio</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of float&#39;</span>
-    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of float&#39;</span>
     <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">shuffle_ratio</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Value error: shuffle_ratio should be in range(0,1)&#39;</span>
-    <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">tol</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Value error: tol should be in range(0,1)&#39;</span>
 
     <span class="c1"># copy dataframe to manipulate it safely</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">shuffle_ratio</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
 
-        <span class="c1"># run through protected attributes columns</span>
-        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-            <span class="c1"># compute number of row to shuffle</span>
-            <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">*</span> <span class="n">shuffle_ratio</span><span class="p">)</span>
-            <span class="c1"># choose n_samples random indexes</span>
-            <span class="n">random_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1"># compute number of row to shuffle</span>
+        <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">*</span> <span class="n">shuffle_ratio</span><span class="p">)</span>
+        <span class="c1"># choose n_samples random indexes</span>
+        <span class="n">random_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-            <span class="c1"># loop to reduce shuffle vanishing</span>
-            <span class="n">ratio</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">while</span> <span class="n">ratio</span> <span class="o">&lt;=</span> <span class="n">shuffle_ratio</span> <span class="o">-</span> <span class="n">tol</span><span class="p">:</span>
-                <span class="c1"># make a permutation of rows</span>
-                <span class="n">shuffled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">,</span> <span class="n">attribute</span><span class="p">])</span>
-                <span class="c1"># replace in data</span>
-                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">,</span> <span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">shuffled</span>
-                <span class="c1"># compute shuffle ratio</span>
-                <span class="n">ratio</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dataframe</span><span class="p">[</span><span class="n">attribute</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
+        <span class="c1"># make a permutation of rows</span>
+        <span class="n">shuffled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">])</span>
+        <span class="c1"># replace in data</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">shuffled</span>
 
     <span class="k">return</span> <span class="n">df</span></div>
 
@@ -265,7 +250,7 @@
 <span class="c1">########################################################################################################################</span>
 <span class="c1">#                                               Column dropping operator                                               #</span>
 <span class="c1">########################################################################################################################</span>
-<div class="viewcode-block" id="column_killing"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.operators.column_killing">[docs]</a><span class="k">def</span> <span class="nf">column_killing</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">protected_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="column_killing"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.operators.column_killing">[docs]</a><span class="k">def</span> <span class="nf">column_killing</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Column killing operator</span>
 
@@ -275,25 +260,27 @@
 
 <span class="sd">    :param dataframe: instance of pandas.DataFrame to compute mutation on</span>
 
-<span class="sd">    :param protected_attributes: list, default None</span>
-<span class="sd">        list with the protected attributes column names</span>
+<span class="sd">    :param protected_attribute: str</span>
+<span class="sd">        protected attributes column name</span>
 
 <span class="sd">    :return: pandas.Dataframe</span>
 <span class="sd">        mutated dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> \
         <span class="s1">&#39;Type error: dataframe should be an instance of &lt;pandas.core.frame.DataFrame&gt;&#39;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attributes</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of list&#39;</span>
-    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
-        <span class="k">assert</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
-            <span class="sa">f</span><span class="s1">&#39;Key error: </span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s1"> not found in dataFrame columns&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> \
+        <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="n">protected_attribute</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
+        <span class="s1">&#39;Key error: protected_attribute elements should be in dataframe columns&#39;</span>
 
     <span class="c1"># make a copy for safe manipulation</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-        <span class="n">df</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)))</span>
+    <span class="c1"># get new value and replace all</span>
+    <span class="n">new_value</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)))</span>
+    <span class="c1"># In case of non generation</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">df</span></div>
 
@@ -301,7 +288,7 @@
 <span class="c1">########################################################################################################################</span>
 <span class="c1">#                                               Redistribution operator                                               #</span>
 <span class="c1">########################################################################################################################</span>
-<div class="viewcode-block" id="redistribution"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.operators.redistribution">[docs]</a><span class="k">def</span> <span class="nf">redistribution</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">protected_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="redistribution"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.operators.redistribution">[docs]</a><span class="k">def</span> <span class="nf">redistribution</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Column occurrence redistribution operator</span>
 
@@ -309,67 +296,65 @@
 
 <span class="sd">    :param dataframe: instance of pandas.DataFrame to compute mutation on</span>
 
-<span class="sd">    :param protected_attributes: list, default None</span>
-<span class="sd">        list with the protected attributes column names</span>
+<span class="sd">    :param protected_attribute: str</span>
+<span class="sd">        protected attributes column name</span>
 
 <span class="sd">    :return: pandas.Dataframe</span>
 <span class="sd">        mutated dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> \
         <span class="s1">&#39;Type error: dataframe should be an instance of &lt;pandas.core.frame.DataFrame&gt;&#39;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attributes</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of list&#39;</span>
-    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
-        <span class="k">assert</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
-            <span class="sa">f</span><span class="s1">&#39;Key error: </span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s1"> not found in dataFrame columns&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> \
+        <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="n">protected_attribute</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
+        <span class="s1">&#39;Key error: protected_attribute elements should be in dataframe columns&#39;</span>
 
     <span class="c1"># make a copy for safe manipulation</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-    <span class="c1"># run through columns</span>
-    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-        <span class="c1"># get column as a series</span>
-        <span class="n">df_col</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+    <span class="c1"># get column as a series</span>
+    <span class="n">df_col</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">]</span>
 
-        <span class="c1"># if value are not string, convert to string and store type</span>
-        <span class="n">was_not_string</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df_col</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">was_not_string</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">old_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">df_col</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">df_col</span> <span class="o">=</span> <span class="n">df_col</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="c1"># if value are not string, convert to string and store type</span>
+    <span class="n">was_not_string</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="c1"># compute distribution</span>
-        <span class="n">distribution</span> <span class="o">=</span> <span class="n">df_col</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">was_not_string</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">old_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="n">df_col</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
-        <span class="c1"># compute balanced repartition</span>
-        <span class="n">redistribution_factor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_col</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">distribution</span><span class="p">))</span>
-        <span class="n">redistribution_leftover</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_col</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">redistribution_factor</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">distribution</span><span class="p">))</span>
-        <span class="n">optimal_distribution</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">redistribution_factor</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">distribution</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">optimal_distribution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimal_distribution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">redistribution_leftover</span>
+    <span class="c1"># compute distribution</span>
+    <span class="n">distribution</span> <span class="o">=</span> <span class="n">df_col</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 
-        <span class="c1"># loop on rows and mark unchanged values</span>
-        <span class="n">unchanged</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_col</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="n">optimal_distribution</span><span class="p">[</span><span class="n">df_col</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">optimal_distribution</span><span class="p">[</span><span class="n">df_col</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">optimal_distribution</span><span class="p">[</span><span class="n">df_col</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">-</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">unchanged</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="c1"># compute balanced repartition</span>
+    <span class="n">redistribution_factor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_col</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">distribution</span><span class="p">))</span>
+    <span class="n">redistribution_leftover</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_col</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">redistribution_factor</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">distribution</span><span class="p">))</span>
+    <span class="n">optimal_distribution</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">redistribution_factor</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">distribution</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">optimal_distribution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimal_distribution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">redistribution_leftover</span>
 
-        <span class="c1"># compute remaining values</span>
-        <span class="n">rest</span> <span class="o">=</span> <span class="n">optimal_distribution</span><span class="p">[</span><span class="n">optimal_distribution</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">rest_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">rest</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
-        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">rest_list</span><span class="p">)</span>
+    <span class="c1"># loop on rows and mark unchanged values</span>
+    <span class="n">unchanged</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_col</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">optimal_distribution</span><span class="p">[</span><span class="n">df_col</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">optimal_distribution</span><span class="p">[</span><span class="n">df_col</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">optimal_distribution</span><span class="p">[</span><span class="n">df_col</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">unchanged</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-        <span class="c1"># place remaining value in unchanged indexes</span>
-        <span class="n">copy</span> <span class="o">=</span> <span class="n">df_col</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">copy</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">unchanged</span><span class="p">]</span> <span class="o">=</span> <span class="n">rest_list</span>
+    <span class="c1"># compute remaining values</span>
+    <span class="n">rest</span> <span class="o">=</span> <span class="n">optimal_distribution</span><span class="p">[</span><span class="n">optimal_distribution</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">rest_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">rest</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">rest_list</span><span class="p">)</span>
 
-        <span class="c1"># if data was not string, reconvert to ancient type</span>
-        <span class="k">if</span> <span class="n">was_not_string</span><span class="p">:</span>
-            <span class="n">copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">old_type</span><span class="p">)</span>
+    <span class="c1"># place remaining value in unchanged indexes</span>
+    <span class="n">copy</span> <span class="o">=</span> <span class="n">df_col</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">copy</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">unchanged</span><span class="p">]</span> <span class="o">=</span> <span class="n">rest_list</span>
 
-        <span class="c1"># replace dataframe column with balanced version</span>
-        <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span>
+    <span class="c1"># if data was not string, reconvert to ancient type</span>
+    <span class="k">if</span> <span class="n">was_not_string</span><span class="p">:</span>
+        <span class="n">copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">old_type</span><span class="p">)</span>
+
+    <span class="c1"># replace dataframe column with balanced version</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span>
 
     <span class="k">return</span> <span class="n">df</span></div>
 
@@ -379,15 +364,14 @@
 <span class="c1">########################################################################################################################</span>
 <span class="c1">#                                              Duplicate mutant operator                                               #</span>
 <span class="c1">########################################################################################################################</span>
-<div class="viewcode-block" id="duplication_mutation"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.operators.duplication_mutation">[docs]</a><span class="k">def</span> <span class="nf">duplication_mutation</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">protected_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">duplication_ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="duplication_mutation"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.operators.duplication_mutation">[docs]</a><span class="k">def</span> <span class="nf">duplication_mutation</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">,</span> <span class="n">duplication_ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;⚠️ Unusable operator&quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> \
         <span class="s1">&#39;Type error: dataframe should be an instance of &lt;pandas.core.frame.DataFrame&gt;&#39;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attributes</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of list&#39;</span>
-    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
-        <span class="k">assert</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
-            <span class="s1">&#39;Key error: protected_attribute elements should be in dataframe columns&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> \
+        <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="n">protected_attribute</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
+        <span class="s1">&#39;Key error: protected_attribute elements should be in dataframe columns&#39;</span>
     <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">duplication_ratio</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of float&#39;</span>
     <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">duplication_ratio</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Value error: shuffle_ratio should be in range(0,1)&#39;</span>
 
@@ -404,22 +388,22 @@
         <span class="c1"># get sub dataframe for performance and run through rows</span>
         <span class="n">sub_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">random_index</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-                <span class="c1"># copy column (pandas warning)</span>
-                <span class="n">copy</span> <span class="o">=</span> <span class="n">sub_df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="c1"># get unique values</span>
-                <span class="n">uniques</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                <span class="c1"># remove current value</span>
-                <span class="n">uniques</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">copy</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
-                <span class="c1"># replace with random value in uniques</span>
-                <span class="n">copy</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniques</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">uniques</span><span class="p">))]</span>
-                <span class="c1"># replace column</span>
-                <span class="n">sub_df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span>
+            <span class="c1"># copy column (pandas warning)</span>
+            <span class="n">copy</span> <span class="o">=</span> <span class="n">sub_df</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="c1"># get unique values</span>
+            <span class="n">uniques</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="c1"># remove current value</span>
+            <span class="n">uniques</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">copy</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+            <span class="c1"># replace with random value in uniques</span>
+            <span class="n">copy</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniques</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">uniques</span><span class="p">))]</span>
+            <span class="c1"># replace column</span>
+            <span class="n">sub_df</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span>
 
         <span class="c1"># add mutant subset to dataframe</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">sub_df</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">df</span></div>
+
 
 <span class="c1">#################### End of unmaintained section ####################</span>
 
@@ -427,7 +411,7 @@
 <span class="c1">########################################################################################################################</span>
 <span class="c1">#                                                  New class operator                                                  #</span>
 <span class="c1">########################################################################################################################</span>
-<div class="viewcode-block" id="new_class"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.operators.new_class">[docs]</a><span class="k">def</span> <span class="nf">new_class</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">protected_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mutation_ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">new_value</span><span class="o">=</span><span class="s1">&#39;null&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="new_class"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.operators.new_class">[docs]</a><span class="k">def</span> <span class="nf">new_class</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">,</span> <span class="n">mutation_ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">new_value</span><span class="o">=</span><span class="s1">&#39;null&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    New class apparition operator</span>
 
@@ -439,8 +423,8 @@
 
 <span class="sd">    :param dataframe: instance of pandas.DataFrame to compute mutation on</span>
 
-<span class="sd">    :param protected_attributes: list, default None</span>
-<span class="sd">        list with the protected attributes column names</span>
+<span class="sd">    :param protected_attribute: str</span>
+<span class="sd">        protected attributes column name</span>
 
 <span class="sd">    :param mutation_ratio: float, default 0.0</span>
 <span class="sd">        proportion of the data to mutate</span>
@@ -453,11 +437,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> \
         <span class="s1">&#39;Type error: dataframe should be an instance of &lt;pandas.core.frame.DataFrame&gt;&#39;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attributes</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of list&#39;</span>
-    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
-        <span class="k">assert</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
-            <span class="s1">&#39;Key error: protected_attribute elements should be in dataframe columns&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> \
+        <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="n">protected_attribute</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
+        <span class="s1">&#39;Key error: protected_attribute elements should be in dataframe columns&#39;</span>
     <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">mutation_ratio</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of float&#39;</span>
     <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">mutation_ratio</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Value error: shuffle_ratio should be in range(0,1)&#39;</span>
 
@@ -471,13 +454,12 @@
         <span class="c1"># choose n_samples random indexes</span>
         <span class="n">random_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-            <span class="n">sub_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sub_df</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="n">random_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+        <span class="n">sub_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sub_df</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">][</span><span class="n">random_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
 
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_index</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">df</span></div>
 </pre></div>

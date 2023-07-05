@@ -194,26 +194,26 @@
         <article role="main">
           <h1>Source code for fairpipes.pipelines</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
 <span class="kn">import</span> <span class="nn">sklearn</span>
-<span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="kn">import</span> <span class="n">check_is_fitted</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
-<span class="kn">from</span> <span class="nn">fairpipes.operators</span> <span class="kn">import</span> <span class="n">column_shuffle</span><span class="p">,</span> <span class="n">column_killing</span><span class="p">,</span> <span class="n">redistribution</span><span class="p">,</span> <span class="n">new_class</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
-<span class="kn">from</span> <span class="nn">fairlearn.metrics</span> <span class="kn">import</span> <span class="n">demographic_parity_difference</span><span class="p">,</span> <span class="n">equalized_odds_difference</span><span class="p">,</span> <span class="n">false_negative_rate</span><span class="p">,</span> \
-    <span class="n">true_negative_rate</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="kn">import</span> <span class="n">check_is_fitted</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
 <span class="kn">from</span> <span class="nn">fairpipes.models</span> <span class="kn">import</span> <span class="n">TensorflowModel</span><span class="p">,</span> <span class="n">SklearnModel</span>
+<span class="kn">from</span> <span class="nn">fairlearn.metrics</span> <span class="kn">import</span> <span class="n">demographic_parity_difference</span><span class="p">,</span> <span class="n">equalized_odds_difference</span>
+<span class="kn">from</span> <span class="nn">fairpipes.operators</span> <span class="kn">import</span> <span class="n">column_shuffle</span><span class="p">,</span> <span class="n">column_killing</span><span class="p">,</span> <span class="n">redistribution</span><span class="p">,</span> <span class="n">new_class</span>
 
 
 <div class="viewcode-block" id="basic_fairness_assessment"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.pipelines.basic_fairness_assessment">[docs]</a><span class="k">def</span> <span class="nf">basic_fairness_assessment</span><span class="p">(</span>
         <span class="n">model</span><span class="p">,</span>
         <span class="n">X_test</span><span class="p">,</span>
         <span class="n">y_test</span><span class="p">,</span>
-        <span class="n">protected_attributes</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">protected_attribute</span><span class="p">,</span>
         <span class="n">mutation_ratio</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">tol</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-        <span class="n">nb_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-        <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span>
+        <span class="n">nb_iter</span><span class="o">=</span><span class="mi">100</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Basic fairness pipeline.</span>
@@ -225,8 +225,6 @@
 <span class="sd">    Compute metrics from fairlearn.metrics demographic_parity_difference, equalized_odds_ratio, false_negative_rate,</span>
 <span class="sd">    true_negative_rate</span>
 
-<span class="sd">    Plot results and return them</span>
-
 <span class="sd">    :param model: an instance of sklearn.base.BaseEstimator or tensorflow.keras.Model</span>
 <span class="sd">        The model should be already trained to allow predictions in the pipeline.</span>
 
@@ -234,32 +232,22 @@
 
 <span class="sd">    :param y_test: a pandas Series corresponding to the target</span>
 
-<span class="sd">    :param protected_attributes: list, default []</span>
-<span class="sd">        protected attribute to mutate</span>
+<span class="sd">    :param protected_attribute: str</span>
+<span class="sd">        protected attribute column name</span>
 
 <span class="sd">    :param mutation_ratio: float, default 0.0</span>
 <span class="sd">        percentage of data to mutate in X_test</span>
 
-<span class="sd">    :param tol: float, default 0.1</span>
-<span class="sd">        miss-shuffling ratio tolerance</span>
-
 <span class="sd">    :param nb_iter: int, default 100</span>
 <span class="sd">        number of pipeline iterations to make p-value tests</span>
 
-<span class="sd">    :param batch_size: int, default 1</span>
-<span class="sd">        training batch size for tensorflow model</span>
-
-<span class="sd">    :return: python dict str, pandas.Dataframe</span>
-<span class="sd">        Dictionary with protected attributes as keys and assessment in values</span>
+<span class="sd">    :return: python dictionary with operators names as keys and metrics distributions as values</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> \
         <span class="s1">&#39;Type error: X_test should be an instance of &lt;pandas.core.frame.DataFrame&gt;&#39;</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">),</span> <span class="s1">&#39;Type error: target elements should be an instance of &lt;pandas.core.Series&gt;&#39;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attributes</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of list&#39;</span>
-    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes elements should be an instance of str&#39;</span>
-        <span class="k">assert</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
-            <span class="sa">f</span><span class="s1">&#39;Key error: </span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s1"> not found in dataFrame columns&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="n">protected_attribute</span> <span class="ow">in</span> <span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Key error: </span><span class="si">{</span><span class="n">protected_attribute</span><span class="si">}</span><span class="s1"> not found in dataFrame columns&#39;</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mutation_ratio</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;Type error: mutation_ratio elements should be an instance of float&#39;</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nb_iter</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;Type error: nb_iter elements should be an instance of int&#39;</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">BaseEstimator</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">),</span> \
@@ -274,36 +262,86 @@
             <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Tensorflow model should be fitted&#39;</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">TensorflowModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">y_test</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">protected_attributes</span><span class="p">:</span>
-        <span class="n">df_shuffle</span> <span class="o">=</span> <span class="n">column_shuffle</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="p">[</span><span class="n">attribute</span><span class="p">],</span> <span class="n">mutation_ratio</span><span class="p">,</span> <span class="n">tol</span><span class="p">)</span>
-        <span class="n">df_dropped</span> <span class="o">=</span> <span class="n">column_killing</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">protected_attributes</span><span class="p">)</span>
-        <span class="n">df_redistributed</span> <span class="o">=</span> <span class="n">redistribution</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="p">[</span><span class="n">attribute</span><span class="p">])</span>
-        <span class="n">df_new_class</span> <span class="o">=</span> <span class="n">new_class</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="p">[</span><span class="n">attribute</span><span class="p">],</span> <span class="n">mutation_ratio</span><span class="p">)</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;original&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]},</span>
+               <span class="s1">&#39;column_shuffle&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]},</span>
+               <span class="s1">&#39;column_dropping&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]},</span>
+               <span class="s1">&#39;redistribution&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]},</span>
+               <span class="s1">&#39;new_class&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]}}</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nb_iter</span><span class="p">)):</span>
+
+        <span class="n">df_shuffle</span> <span class="o">=</span> <span class="n">column_shuffle</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">,</span> <span class="n">mutation_ratio</span><span class="p">)</span>
+        <span class="n">df_dropped</span> <span class="o">=</span> <span class="n">column_killing</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">)</span>
+        <span class="n">df_redistributed</span> <span class="o">=</span> <span class="n">redistribution</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">)</span>
+        <span class="n">df_new_class</span> <span class="o">=</span> <span class="n">new_class</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">,</span> <span class="n">mutation_ratio</span><span class="p">)</span>
+
         <span class="n">mutants</span> <span class="o">=</span> <span class="p">[</span><span class="n">X_test</span><span class="p">,</span> <span class="n">df_shuffle</span><span class="p">,</span> <span class="n">df_dropped</span><span class="p">,</span> <span class="n">df_redistributed</span><span class="p">,</span> <span class="n">df_new_class</span><span class="p">]</span>
         <span class="n">predictions</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">mutants</span><span class="p">)</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;original&#39;</span><span class="p">,</span> <span class="s1">&#39;column_shuffle&#39;</span><span class="p">,</span> <span class="s1">&#39;column_dropping&#39;</span><span class="p">,</span> <span class="s1">&#39;redistribution&#39;</span><span class="p">,</span> <span class="s1">&#39;new_class&#39;</span><span class="p">]</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">metric_dfs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">)):</span>
-            <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                       <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-                       <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="n">demographic_parity_difference</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                                            <span class="n">sensitive_features</span><span class="o">=</span><span class="n">X_test</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
-                       <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="n">equalized_odds_difference</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                                        <span class="n">sensitive_features</span><span class="o">=</span><span class="n">X_test</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
-                       <span class="s1">&#39;fnr&#39;</span><span class="p">:</span> <span class="n">false_negative_rate</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-                       <span class="s1">&#39;tnr&#39;</span><span class="p">:</span> <span class="n">true_negative_rate</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">])}</span>
+            <span class="n">acc</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">dpd</span> <span class="o">=</span> <span class="n">demographic_parity_difference</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                                <span class="n">sensitive_features</span><span class="o">=</span><span class="n">X_test</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">eod</span> <span class="o">=</span> <span class="n">equalized_odds_difference</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                            <span class="n">sensitive_features</span><span class="o">=</span><span class="n">X_test</span><span class="p">[</span><span class="n">protected_attribute</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
-            <span class="n">metric_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">metric_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_df</span><span class="p">)</span>
+            <span class="n">history</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
+            <span class="n">history</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="s1">&#39;dpd&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dpd</span><span class="p">)</span>
+            <span class="n">history</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="s1">&#39;eod&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eod</span><span class="p">)</span>
 
-        <span class="n">result_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">metric_dfs</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">history</span></div>
 
-        <span class="n">results</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_df</span>
 
-    <span class="k">return</span> <span class="n">results</span></div>
+<div class="viewcode-block" id="multi_mutation_fairness_assessment"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.pipelines.multi_mutation_fairness_assessment">[docs]</a><span class="k">def</span> <span class="nf">multi_mutation_fairness_assessment</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">,</span>
+        <span class="n">protected_attribute</span><span class="p">,</span>
+        <span class="n">mutation_ratios</span><span class="p">,</span>
+        <span class="n">nb_iter</span><span class="o">=</span><span class="mi">100</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Multi mutation ratio fairness pipeline.</span>
+
+<span class="sd">    Make a simple mutation pipeline for each mutation ratio in parameter</span>
+
+<span class="sd">    :param model: an instance of sklearn.base.BaseEstimator or tensorflow.keras.Model</span>
+<span class="sd">        The model should be already trained to allow predictions in the pipeline.</span>
+
+<span class="sd">    :param X_test: a pandas DataFrame without the target variable.</span>
+
+<span class="sd">    :param y_test: a pandas Series corresponding to the target</span>
+
+<span class="sd">    :param protected_attribute: str</span>
+<span class="sd">        protected attribute column name</span>
+
+<span class="sd">    :param mutation_ratios: list</span>
+<span class="sd">        data percentages to mutate in X_test</span>
+
+<span class="sd">    :param nb_iter: int, default 100</span>
+<span class="sd">        number of pipeline iterations to make p-value tests</span>
+
+<span class="sd">    :return: list</span>
+<span class="sd">        histories of each mutation ratio assessment</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> \
+        <span class="s1">&#39;Type error: X_test should be an instance of &lt;pandas.core.frame.DataFrame&gt;&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">),</span> <span class="s1">&#39;Type error: target elements should be an instance of &lt;pandas.core.Series&gt;&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protected_attribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;Type error: protected_attributes should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mutation_ratios</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;Type error: mutation_ratios should be an instance of list&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nb_iter</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;Type error: nb_iter elements should be an instance of int&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">BaseEstimator</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">),</span> \
+        <span class="s1">&#39;Type error: model elements should be an instance of &lt;sklearn.base.BaseEstimator&gt; or &lt;tensorflow.keras.Model&gt;&#39;</span>
+
+    <span class="n">histories</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mutation_ratios</span><span class="p">)):</span>
+        <span class="n">hist</span> <span class="o">=</span> <span class="n">basic_fairness_assessment</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">protected_attribute</span><span class="p">,</span>
+                                         <span class="n">mutation_ratio</span><span class="o">=</span><span class="n">mutation_ratios</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nb_iter</span><span class="o">=</span><span class="n">nb_iter</span><span class="p">)</span>
+        <span class="n">histories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">histories</span></div>
 </pre></div>
         </article>
       </div>

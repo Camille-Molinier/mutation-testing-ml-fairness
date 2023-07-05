@@ -1,4 +1,5 @@
 import pandas as pd
+from tqdm import tqdm
 
 import sklearn
 from sklearn.metrics import accuracy_score
@@ -6,7 +7,6 @@ from sklearn.utils.validation import check_is_fitted
 
 import tensorflow as tf
 
-from fairpipes.utils import hist_to_dataframe
 from fairpipes.models import TensorflowModel, SklearnModel
 from fairlearn.metrics import demographic_parity_difference, equalized_odds_difference
 from fairpipes.operators import column_shuffle, column_killing, redistribution, new_class
@@ -74,7 +74,7 @@ def basic_fairness_assessment(
                'new_class': {'accuracy': [], 'dpd': [], 'eod': []}}
     names = list(history.keys())
 
-    for _ in range(nb_iter):
+    for _ in tqdm(range(nb_iter)):
 
         df_shuffle = column_shuffle(X_test, protected_attribute, mutation_ratio)
         df_dropped = column_killing(X_test, protected_attribute)
@@ -104,9 +104,8 @@ def multi_mutation_fairness_assessment(
         y_test,
         protected_attribute,
         mutation_ratios,
-        nb_iter=100,
-        output_name='out'
-) -> tuple:
+        nb_iter=100
+) -> list:
     """
     Multi mutation ratio fairness pipeline.
 
@@ -128,15 +127,8 @@ def multi_mutation_fairness_assessment(
     :param nb_iter: int, default 100
         number of pipeline iterations to make p-value tests
 
-    :param output_name: str, default 'out'
-        name of the output csv file
-
-    :return: python tuple, list / list
-        tuple with :
-
-            [1]: List of dictionaries with protected attributes as keys and assessment in values
-
-            [2]: List of dictionaries with metrics values for each operator and each iteration
+    :return: list
+        histories of each mutation ratio assessment
     """
     assert type(X_test) == pd.DataFrame, \
         'Type error: X_test should be an instance of <pandas.core.frame.DataFrame>'
@@ -153,8 +145,5 @@ def multi_mutation_fairness_assessment(
         hist = basic_fairness_assessment(model, X_test, y_test, protected_attribute,
                                          mutation_ratio=mutation_ratios[i], nb_iter=nb_iter)
         histories.append(hist)
-
-    result_df = hist_to_dataframe(histories)
-    result_df.to_csv(f'./dat/exports/{output_name}.csv')
 
     return histories

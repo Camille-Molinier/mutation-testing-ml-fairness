@@ -196,14 +196,70 @@
         <article role="main">
           <section id="fairpipes-package">
 <h1>fairpipes package<a class="headerlink" href="#fairpipes-package" title="Permalink to this heading">#</a></h1>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
+<section id="module-fairpipes.pipelines">
+<span id="fairpipes-pipelines"></span><h2>fairpipes.pipelines<a class="headerlink" href="#module-fairpipes.pipelines" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="fairpipes.pipelines.basic_fairness_assessment">
+<span class="sig-prename descclassname"><span class="pre">fairpipes.pipelines.</span></span><span class="sig-name descname"><span class="pre">basic_fairness_assessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/fairpipes/pipelines.html#basic_fairness_assessment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.pipelines.basic_fairness_assessment" title="Permalink to this definition">#</a></dt>
+<dd><p>Basic fairness pipeline.</p>
+<p>Make X_test from fairpipes.operators column_shuffle, column_dropping, redistribution, new_class mutants</p>
+<p>Compute model predictions for X_test and mutants.</p>
+<p>Compute metrics from fairlearn.metrics demographic_parity_difference, equalized_odds_ratio, false_negative_rate,
+true_negative_rate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – an instance of sklearn.base.BaseEstimator or tensorflow.keras.Model
+The model should be already trained to allow predictions in the pipeline.</p></li>
+<li><p><strong>X_test</strong> – a pandas DataFrame without the target variable.</p></li>
+<li><p><strong>y_test</strong> – a pandas Series corresponding to the target</p></li>
+<li><p><strong>protected_attribute</strong> – str
+protected attribute column name</p></li>
+<li><p><strong>mutation_ratio</strong> – float, default 0.0
+percentage of data to mutate in X_test</p></li>
+<li><p><strong>nb_iter</strong> – int, default 100
+number of pipeline iterations to make p-value tests</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>python dictionary with operators names as keys and metrics distributions as values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairpipes.pipelines.multi_mutation_fairness_assessment">
+<span class="sig-prename descclassname"><span class="pre">fairpipes.pipelines.</span></span><span class="sig-name descname"><span class="pre">multi_mutation_fairness_assessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_ratios</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/fairpipes/pipelines.html#multi_mutation_fairness_assessment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.pipelines.multi_mutation_fairness_assessment" title="Permalink to this definition">#</a></dt>
+<dd><p>Multi mutation ratio fairness pipeline.</p>
+<p>Make a simple mutation pipeline for each mutation ratio in parameter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – an instance of sklearn.base.BaseEstimator or tensorflow.keras.Model
+The model should be already trained to allow predictions in the pipeline.</p></li>
+<li><p><strong>X_test</strong> – a pandas DataFrame without the target variable.</p></li>
+<li><p><strong>y_test</strong> – a pandas Series corresponding to the target</p></li>
+<li><p><strong>protected_attribute</strong> – str
+protected attribute column name</p></li>
+<li><p><strong>mutation_ratios</strong> – list
+data percentages to mutate in X_test</p></li>
+<li><p><strong>nb_iter</strong> – int, default 100
+number of pipeline iterations to make p-value tests</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list
+histories of each mutation ratio assesment</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-fairpipes.operators">
-<span id="fairpipes-operators-module"></span><h2>fairpipes.operators module<a class="headerlink" href="#module-fairpipes.operators" title="Permalink to this heading">#</a></h2>
+<span id="fairpipes-operators"></span><h2>fairpipes.operators<a class="headerlink" href="#module-fairpipes.operators" title="Permalink to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="fairpipes.operators.column_killing">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.operators.</span></span><span class="sig-name descname"><span class="pre">column_killing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/operators.html#column_killing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.operators.column_killing" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fairpipes.operators.</span></span><span class="sig-name descname"><span class="pre">column_killing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attribute</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/operators.html#column_killing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.operators.column_killing" title="Permalink to this definition">#</a></dt>
 <dd><p>Column killing operator</p>
 <p>Set all values in the column with one of the possible values</p>
 <p>Statistically killing the column</p>
@@ -211,8 +267,8 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dataframe</strong> – instance of pandas.DataFrame to compute mutation on</p></li>
-<li><p><strong>protected_attributes</strong> – list, default None
-list with the protected attributes column names</p></li>
+<li><p><strong>protected_attribute</strong> – str
+protected attributes column name</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -224,7 +280,7 @@ mutated dataset</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fairpipes.operators.column_shuffle">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.operators.</span></span><span class="sig-name descname"><span class="pre">column_shuffle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/operators.html#column_shuffle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.operators.column_shuffle" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fairpipes.operators.</span></span><span class="sig-name descname"><span class="pre">column_shuffle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/operators.html#column_shuffle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.operators.column_shuffle" title="Permalink to this definition">#</a></dt>
 <dd><p>Column shuffling operator</p>
 <p>Take a portion of the column of shuffle_ratio*len(dataframe) and randomly make permutations of protected_attributes</p>
 <p>Random permutations can generate unchanged values, tol attribute define unchanged values ratio tolerance.</p>
@@ -232,12 +288,10 @@ mutated dataset</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dataframe</strong> – instance of pandas.DataFrame to compute mutation on</p></li>
-<li><p><strong>protected_attributes</strong> – list, default None
-list with the protected attributes column names</p></li>
+<li><p><strong>protected_attribute</strong> – str
+protected attributes column name</p></li>
 <li><p><strong>shuffle_ratio</strong> – float, default 0.0
 ratio of the data to mutate</p></li>
-<li><p><strong>tol</strong> – float, default 0.1
-miss-shuffling ratio tolerance</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -249,13 +303,13 @@ mutated dataset</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fairpipes.operators.duplication_mutation">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.operators.</span></span><span class="sig-name descname"><span class="pre">duplication_mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplication_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/operators.html#duplication_mutation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.operators.duplication_mutation" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fairpipes.operators.</span></span><span class="sig-name descname"><span class="pre">duplication_mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplication_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/operators.html#duplication_mutation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.operators.duplication_mutation" title="Permalink to this definition">#</a></dt>
 <dd><p>⚠️ Unusable operator</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fairpipes.operators.new_class">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.operators.</span></span><span class="sig-name descname"><span class="pre">new_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'null'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/operators.html#new_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.operators.new_class" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fairpipes.operators.</span></span><span class="sig-name descname"><span class="pre">new_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'null'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/operators.html#new_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.operators.new_class" title="Permalink to this definition">#</a></dt>
 <dd><p>New class apparition operator</p>
 <p>Simulate new value in production data for protected attribute</p>
 <p>For numeric columns, new value is max value + 1</p>
@@ -264,8 +318,8 @@ mutated dataset</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dataframe</strong> – instance of pandas.DataFrame to compute mutation on</p></li>
-<li><p><strong>protected_attributes</strong> – list, default None
-list with the protected attributes column names</p></li>
+<li><p><strong>protected_attribute</strong> – str
+protected attributes column name</p></li>
 <li><p><strong>mutation_ratio</strong> – float, default 0.0
 proportion of the data to mutate</p></li>
 <li><p><strong>new_value</strong> – str, default ‘null’
@@ -281,15 +335,15 @@ mutated dataset</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fairpipes.operators.redistribution">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.operators.</span></span><span class="sig-name descname"><span class="pre">redistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/operators.html#redistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.operators.redistribution" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fairpipes.operators.</span></span><span class="sig-name descname"><span class="pre">redistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attribute</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/operators.html#redistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.operators.redistribution" title="Permalink to this definition">#</a></dt>
 <dd><p>Column occurrence redistribution operator</p>
 <p>Compute current value counts and rebalance distribution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dataframe</strong> – instance of pandas.DataFrame to compute mutation on</p></li>
-<li><p><strong>protected_attributes</strong> – list, default None
-list with the protected attributes column names</p></li>
+<li><p><strong>protected_attribute</strong> – str
+protected attributes column name</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -300,46 +354,151 @@ mutated dataset</p>
 </dd></dl>
 
 </section>
-<section id="module-fairpipes.pipelines">
-<span id="fairpipes-pipelines-module"></span><h2>fairpipes.pipelines module<a class="headerlink" href="#module-fairpipes.pipelines" title="Permalink to this heading">#</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="fairpipes.pipelines.basic_fairness_assessment">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.pipelines.</span></span><span class="sig-name descname"><span class="pre">basic_fairness_assessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/fairpipes/pipelines.html#basic_fairness_assessment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.pipelines.basic_fairness_assessment" title="Permalink to this definition">#</a></dt>
-<dd><p>Basic fairness pipeline.</p>
-<p>Make X_test from fairpipes.operators column_shuffle, column_dropping, redistribution, new_class mutants</p>
-<p>Compute model predictions for X_test and mutants.</p>
-<p>Compute metrics from fairlearn.metrics demographic_parity_difference, equalized_odds_ratio, false_negative_rate,
-true_negative_rate</p>
-<p>Plot results and return them</p>
+<section id="module-fairpipes.models">
+<span id="fairpipes-models"></span><h2>fairpipes.models<a class="headerlink" href="#module-fairpipes.models" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="fairpipes.models.Model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fairpipes.models.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><a class="reference internal" href="_modules/fairpipes/models.html#Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.models.Model" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="fairpipes.models.Model.predict">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/fairpipes/models.html#Model.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.models.Model.predict" title="Permalink to this definition">#</a></dt>
+<dd><p>Make predictions for a list of DataFrames</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>model</strong> – an instance of sklearn.base.BaseEstimator or tensorflow.keras.Model
-The model should be already trained to allow predictions in the pipeline.</p></li>
-<li><p><strong>X_test</strong> – a pandas DataFrame without the target variable.</p></li>
-<li><p><strong>y_test</strong> – a pandas Series corresponding to the target</p></li>
-<li><p><strong>protected_attributes</strong> – list, default []
-protected attribute to mutate</p></li>
-<li><p><strong>mutation_ratio</strong> – float, default 0.0
-percentage of data to mutate in X_test</p></li>
-<li><p><strong>tol</strong> – float, default 0.1
-miss-shuffling ratio tolerance</p></li>
-<li><p><strong>nb_iter</strong> – int, default 100
-number of pipeline iterations to make p-value tests</p></li>
-<li><p><strong>batch_size</strong> – int, default 1
-training batch size for tensorflow model</p></li>
-</ul>
+<dd class="field-odd"><p><strong>dataframes</strong> – list, default []
+pandas DataFrames list to predictions</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>python dict str, pandas.Dataframe
-Dictionary with protected attributes as keys and assessment in values</p>
+<dd class="field-even"><p>list of pandas.Series containing predictions in the same order as dataframes</p>
 </dd>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairpipes.models.SklearnModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fairpipes.models.</span></span><span class="sig-name descname"><span class="pre">SklearnModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fairpipes/models.html#SklearnModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.models.SklearnModel" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fairpipes.models.Model" title="fairpipes.models.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="fairpipes.models.SklearnModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/fairpipes/models.html#SklearnModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.models.SklearnModel.predict" title="Permalink to this definition">#</a></dt>
+<dd><p>Make predictions for a list of DataFrames</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dataframes</strong> – list, default []
+pandas DataFrames list to predictions</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of pandas.Series containing predictions in the same order as dataframes</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairpipes.models.TensorflowModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fairpipes.models.</span></span><span class="sig-name descname"><span class="pre">TensorflowModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fairpipes/models.html#TensorflowModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.models.TensorflowModel" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fairpipes.models.Model" title="fairpipes.models.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="fairpipes.models.TensorflowModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/fairpipes/models.html#TensorflowModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.models.TensorflowModel.predict" title="Permalink to this definition">#</a></dt>
+<dd><p>Make predictions for a list of DataFrames</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dataframes</strong> – list, default []
+pandas DataFrames list to predictions</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of pandas.Series containing predictions in the same order as dataframes</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="module-fairpipes">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-fairpipes" title="Permalink to this heading">#</a></h2>
+<section id="module-fairpipes.utils">
+<span id="fairpipes-utils"></span><h2>fairpipes.utils<a class="headerlink" href="#module-fairpipes.utils" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="fairpipes.utils.hist_to_dataframe">
+<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">hist_to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fairpipes/utils.html#hist_to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.hist_to_dataframe" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert history from basic pipeline to pandas dataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>hist</strong> – dict
+basic pipeline result</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame
+columns : metrics for each metrics
+rows : values over all iterations</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairpipes.utils.make_fig">
+<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">make_fig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fairpipes/utils.html#make_fig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.make_fig" title="Permalink to this definition">#</a></dt>
+<dd><p>Make figure from simple pipeline assessment.</p>
+<p>Show distributions for each operator with a combination of a boxplot and violinplot</p>
+<a class="reference internal image-reference" href="_images/DT_01.png"><img alt="_images/DT_01.png" src="_images/DT_01.png" style="width: 500px;" /></a>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>history</strong> – dict
+history from simple pipeline assessment</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairpipes.utils.make_history_figs">
+<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">make_history_figs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutations</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fairpipes/utils.html#make_history_figs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.make_history_figs" title="Permalink to this definition">#</a></dt>
+<dd><p>Make figure from simple pipeline assessment.</p>
+<p>Show distributions for each operator with subplots.</p>
+<p>Each subplot correspond to the average of a metric over all the iteration</p>
+<a class="reference internal image-reference" href="_images/history_figs.png"><img alt="_images/history_figs.png" src="_images/history_figs.png" style="width: 500px;" /></a>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>history</strong> – list
+histories from multiple mutations pipeline assessment</p></li>
+<li><p><strong>mutations</strong> – list
+mutation ratios applied in pipeline</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairpipes.utils.make_multi_hist_dataframe">
+<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">make_multi_hist_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">histories</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutations</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fairpipes/utils.html#make_multi_hist_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.make_multi_hist_dataframe" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert history from basic pipeline to pandas dataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>histories</strong> – list
+histories returned from multiple mutations pipeline</p></li>
+<li><p><strong>mutations</strong> – list
+mutation ration applied in pipeline</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame
+columns : metrics for each metrics and mutation ratio
+rows : values over all iterations</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -391,8 +550,12 @@ Dictionary with protected attributes as keys and assessment in values</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">fairpipes package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-fairpipes.operators">fairpipes.operators module</a><ul>
+<li><a class="reference internal" href="#module-fairpipes.pipelines">fairpipes.pipelines</a><ul>
+<li><a class="reference internal" href="#fairpipes.pipelines.basic_fairness_assessment"><code class="docutils literal notranslate"><span class="pre">basic_fairness_assessment()</span></code></a></li>
+<li><a class="reference internal" href="#fairpipes.pipelines.multi_mutation_fairness_assessment"><code class="docutils literal notranslate"><span class="pre">multi_mutation_fairness_assessment()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-fairpipes.operators">fairpipes.operators</a><ul>
 <li><a class="reference internal" href="#fairpipes.operators.column_killing"><code class="docutils literal notranslate"><span class="pre">column_killing()</span></code></a></li>
 <li><a class="reference internal" href="#fairpipes.operators.column_shuffle"><code class="docutils literal notranslate"><span class="pre">column_shuffle()</span></code></a></li>
 <li><a class="reference internal" href="#fairpipes.operators.duplication_mutation"><code class="docutils literal notranslate"><span class="pre">duplication_mutation()</span></code></a></li>
@@ -400,11 +563,28 @@ Dictionary with protected attributes as keys and assessment in values</p>
 <li><a class="reference internal" href="#fairpipes.operators.redistribution"><code class="docutils literal notranslate"><span class="pre">redistribution()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-fairpipes.pipelines">fairpipes.pipelines module</a><ul>
-<li><a class="reference internal" href="#fairpipes.pipelines.basic_fairness_assessment"><code class="docutils literal notranslate"><span class="pre">basic_fairness_assessment()</span></code></a></li>
+<li><a class="reference internal" href="#module-fairpipes.models">fairpipes.models</a><ul>
+<li><a class="reference internal" href="#fairpipes.models.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a><ul>
+<li><a class="reference internal" href="#fairpipes.models.Model.predict"><code class="docutils literal notranslate"><span class="pre">Model.predict()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-fairpipes">Module contents</a></li>
+<li><a class="reference internal" href="#fairpipes.models.SklearnModel"><code class="docutils literal notranslate"><span class="pre">SklearnModel</span></code></a><ul>
+<li><a class="reference internal" href="#fairpipes.models.SklearnModel.predict"><code class="docutils literal notranslate"><span class="pre">SklearnModel.predict()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fairpipes.models.TensorflowModel"><code class="docutils literal notranslate"><span class="pre">TensorflowModel</span></code></a><ul>
+<li><a class="reference internal" href="#fairpipes.models.TensorflowModel.predict"><code class="docutils literal notranslate"><span class="pre">TensorflowModel.predict()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-fairpipes.utils">fairpipes.utils</a><ul>
+<li><a class="reference internal" href="#fairpipes.utils.hist_to_dataframe"><code class="docutils literal notranslate"><span class="pre">hist_to_dataframe()</span></code></a></li>
+<li><a class="reference internal" href="#fairpipes.utils.make_fig"><code class="docutils literal notranslate"><span class="pre">make_fig()</span></code></a></li>
+<li><a class="reference internal" href="#fairpipes.utils.make_history_figs"><code class="docutils literal notranslate"><span class="pre">make_history_figs()</span></code></a></li>
+<li><a class="reference internal" href="#fairpipes.utils.make_multi_hist_dataframe"><code class="docutils literal notranslate"><span class="pre">make_multi_hist_dataframe()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
