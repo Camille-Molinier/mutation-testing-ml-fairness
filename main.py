@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.stats import mannwhitneyu
 
 from fairpipes.utils import make_history_figs, make_multi_hist_dataframe
 from fairpipes.pipelines import multi_mutation_fairness_assessment
@@ -25,12 +26,25 @@ def main():
 
     mutations = [0.1, 0.2, 0.3, 0.4, 0.5]
 
+    N = 1000
     hist = multi_mutation_fairness_assessment(model, X_test, y_test, protected_attribute='sex',
-                                              mutation_ratios=mutations, nb_iter=500)
+                                              mutation_ratios=mutations, nb_iter=N)
+    print()
+    hist2 = multi_mutation_fairness_assessment(model, X_test, y_test, protected_attribute='sex',
+                                               mutation_ratios=mutations, nb_iter=N)
 
     make_history_figs(hist, mutations)
-    result_df = make_multi_hist_dataframe(hist, mutations)
-    result_df.to_csv(f'./dat/exports/Adult_dt_2.csv')
+    make_history_figs(hist2, mutations)
+
+    results = make_multi_hist_dataframe(hist, mutations)
+    results2 = make_multi_hist_dataframe(hist2, mutations)
+
+    results.to_csv(f'./dat/exports/Adult_dt.csv')
+    results2.to_csv(f'./dat/exports/Adult_dt_2.csv')
+
+    for col in results.columns[1:]:
+        _, p = mannwhitneyu(results[col], results2[col])
+        print(f"{f'{col}' : <30} {p}")
 
     plt.show()
 

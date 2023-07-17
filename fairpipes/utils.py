@@ -1,24 +1,10 @@
-import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import mannwhitneyu
 import pandas as pd
 
 
-def make_fig(history):
-    """
-    Make figure from simple pipeline assessment.
-
-    Show distributions for each operator with a combination of a boxplot and violinplot
-
-    .. image:: DT_01.png
-        :width: 500
-
-    :param history: dict
-        history from simple pipeline assessment
-
-    :return: None
-    """
-    assert isinstance(history, dict), 'TypeError: history parameter should be an instance of dict'
-
+def make_fig(history, title=""):
     names = list(history.keys())[1:]
     accuracies = [history[key]['accuracy'] for key in names]
     dpd = [history[key]['dpd'] for key in names]
@@ -45,37 +31,14 @@ def make_fig(history):
     axes[2].set_ylabel('eod')
 
 
-def make_history_figs(history, mutations):
-    """
-        Make figure from simple pipeline assessment.
-
-        Show distributions for each operator with subplots.
-
-        Each subplot correspond to the average of a metric over all the iteration
-
-        .. image:: history_figs.png
-            :width: 500
-
-        :param history: list
-            histories from multiple mutations pipeline assessment
-
-        :param mutations: list
-            mutation ratios applied in pipeline
-
-        :return: None
-        """
-    assert isinstance(history, list), 'TypeError: history parameter should be an instance of list'
-    assert isinstance(mutations, list), 'TypeError: mutations parameter should be an instance of list'
-    for element in mutations:
-        assert isinstance(element, float), 'TypeError: mutations parameter elements should be instance of float'
-
+def make_history_figs(history, mutations, title=''):
     original = {'accuracy': [], 'dpd': [], 'eod': []}
     shuffle = {'accuracy': [], 'dpd': [], 'eod': []}
     killing = {'accuracy': [], 'dpd': [], 'eod': []}
     redistribution = {'accuracy': [], 'dpd': [], 'eod': []}
     new_class = {'accuracy': [], 'dpd': [], 'eod': []}
     datasets = [shuffle, killing, redistribution, new_class]
-    names = ['shuffle', 'killing', 'redistribution', 'new_class']
+    names = ['column_shuffle', 'column_killing', 'redistribution', 'new_class']
     metrics = ['accuracy', 'dpd', 'eod']
 
     for mutation in history:
@@ -89,22 +52,29 @@ def make_history_figs(history, mutations):
 
     fig, axes = plt.subplots(len(datasets), 3, figsize=(12, 8))
 
+    original_acc = original['accuracy']
+    original_dpd = original['dpd']
+    original_eod = original['eod']
+
     for i, df in enumerate(datasets):
         accuracy = df['accuracy']
         dpd = df['dpd']
         eod = df['eod']
 
         axes[i, 0].plot(accuracy)
+        axes[i, 0].plot(original_acc, '--', color='orange')
         axes[i, 0].set_ylabel('Accuracy')
         axes[i, 0].set_xticks(range(len(mutations)))
         axes[i, 0].set_xticklabels(mutations)
 
         axes[i, 1].plot(dpd, color='r')
+        axes[i, 1].plot(original_dpd, '--', color='orange')
         axes[i, 1].set_ylabel('dpd')
         axes[i, 1].set_xticks(range(len(mutations)))
         axes[i, 1].set_xticklabels(mutations)
 
         axes[i, 2].plot(eod, color='g')
+        axes[i, 2].plot(original_eod, '--', color='orange')
         axes[i, 2].set_ylabel('eod')
         axes[i, 2].set_xticks(range(len(mutations)))
         axes[i, 2].set_xticklabels(mutations)
@@ -121,68 +91,64 @@ def make_history_figs(history, mutations):
 
         axes[i, 1].set_title(names[i])
 
+    fig.suptitle(title)
     plt.tight_layout()
 
 
 def hist_to_dataframe(hist):
-    """
-    Convert history from basic pipeline to pandas dataFrame
-
-    :param hist: dict
-        basic pipeline result
-
-    :return: DataFrame
-        columns : metrics for each metrics
-        rows : values over all iterations
-    """
-    assert isinstance(hist, dict), 'TypeError: hist parameter should be an instance of dict'
-    # create empty list
     dfs = []
-    # run through all operators
     for key in hist:
-        # transpose dict to dataframe
         df = pd.DataFrame.from_dict(hist[key])
-        # rename column with <operator>_<metric>
         new_columns = {}
         for col in df.columns:
             new_columns[col] = f'{key}_{col}'
         df.rename(columns=new_columns, inplace=True)
         dfs.append(df)
 
-    # concat all dataframes in one
     result = pd.concat(dfs, axis=1)
-
     return result
 
 
 def make_multi_hist_dataframe(histories, mutations):
-    """
-    Convert history from basic pipeline to pandas dataFrame
-
-    :param histories: list
-        histories returned from multiple mutations pipeline
-
-    :param mutations: list
-        mutation ration applied in pipeline
-
-    :return: DataFrame
-        columns : metrics for each metrics and mutation ratio
-        rows : values over all iterations
-    """
-    # create empty list
     dfs = []
-
-    # run through histories
     for i, hist in enumerate(histories):
-        # convert history to dataframe
         df = hist_to_dataframe(hist)
-        # append columns names with corresponding mutation ration
         new_columns = {}
         for col in df.columns:
             new_columns[col] = f'{mutations[i]}_{col}'
         df.rename(columns=new_columns, inplace=True)
         dfs.append(df)
-    # concatenate dataframes along columns
     result = pd.concat(dfs, axis=1)
+    return result
+
+
+def make_stats(hist, display=True):
+    dfs = []
+    for key in list(hist.keys())[1:]:
+        tmp = {'operator': key}
+        for metric in hist[key]:
+            _, p = mannwhitneyu(hist["original"][metric], hist[key][metric])
+            tmp[metric] = [p]
+        dfs.append(pd.DataFrame.from_dict(tmp))
+    result = pd.concat(dfs)
+
+    if display:
+        pivot_table = result.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
+        plt.figure()
+        sns.heatmap(pivot_table, annot=True, cmap='coolwarm', linewidths=0.5)
 
     return result
+
+
+def make_multi_stats(hists, mutations):
+    plt.figure(figsize=(15, 8))
+    for i, hist in enumerate(hists):
+        res = make_stats(hist, display=False)
+        pivot_table = res.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
+        plt.subplot(2, 3, i + 1)
+        sns.heatmap(pivot_table, annot=True, cmap='coolwarm', linewidths=0.5, cbar=False)
+        plt.title(f'mutation ratio = {mutations[i]}')
+
+    plt.subplots_adjust(wspace=0.4, hspace=0.4)
+    plt.tight_layout()
+    plt.show()
