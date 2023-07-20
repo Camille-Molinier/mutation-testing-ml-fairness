@@ -1,10 +1,11 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.stats import mannwhitneyu
+import numpy as np
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy.stats import mannwhitneyu
 
 
-def make_fig(history, title=""):
+def make_fig(history, display=True):
     names = list(history.keys())[1:]
     accuracies = [history[key]['accuracy'] for key in names]
     dpd = [history[key]['dpd'] for key in names]
@@ -30,15 +31,18 @@ def make_fig(history, title=""):
     axes[2].set_xticklabels(names, rotation=30)
     axes[2].set_ylabel('eod')
 
+    if not display:
+        plt.close()
 
-def make_history_figs(history, mutations, title=''):
+
+def make_history_figs(history, mutations, title='', save_path='', display=True):
     original = {'accuracy': [], 'dpd': [], 'eod': []}
     shuffle = {'accuracy': [], 'dpd': [], 'eod': []}
     killing = {'accuracy': [], 'dpd': [], 'eod': []}
     redistribution = {'accuracy': [], 'dpd': [], 'eod': []}
     new_class = {'accuracy': [], 'dpd': [], 'eod': []}
     datasets = [shuffle, killing, redistribution, new_class]
-    names = ['column_shuffle', 'column_killing', 'redistribution', 'new_class']
+    names = ['shuffle', 'killing', 'redistribution', 'new_class']
     metrics = ['accuracy', 'dpd', 'eod']
 
     for mutation in history:
@@ -57,6 +61,10 @@ def make_history_figs(history, mutations, title=''):
     original_eod = original['eod']
 
     for i, df in enumerate(datasets):
+        axes[i, 0].ticklabel_format(useOffset=False)
+        axes[i, 1].ticklabel_format(useOffset=False)
+        axes[i, 2].ticklabel_format(useOffset=False)
+
         accuracy = df['accuracy']
         dpd = df['dpd']
         eod = df['eod']
@@ -94,6 +102,12 @@ def make_history_figs(history, mutations, title=''):
     fig.suptitle(title)
     plt.tight_layout()
 
+    if save_path != '':
+        plt.savefig(save_path)
+
+    if not display:
+        plt.close()
+
 
 def hist_to_dataframe(hist):
     dfs = []
@@ -123,6 +137,40 @@ def make_multi_hist_dataframe(histories, mutations):
 
 
 def make_stats(hist, display=True):
+    p_values = compute_p_values(hist)
+    effect_sizes = compute_effect_size(hist)
+
+    if display:
+        plt.figure(figsize=(10, 4))
+
+        plt.subplot(1, 2, 1)
+        pivot_table = p_values.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='flare', linewidths=0.5, cbar=False)
+        plt.title('p_values')
+
+        plt.subplot(1, 2, 2)
+        pivot_table = effect_sizes.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='flare', linewidths=0.5, cbar=False)
+        plt.title('effect_sizes')
+
+        plt.subplots_adjust(wspace=0.4, hspace=1)
+        plt.tight_layout()
+
+    return p_values, effect_sizes
+
+
+def cohend(d1, d2):
+    n1, n2 = len(d1), len(d2)
+    s1, s2 = np.var(d1, ddof=1), np.var(d2, ddof=1)
+    s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
+    u1, u2 = np.mean(d1), np.mean(d2)
+    if s == 0 and (u1 - u2) == 0:
+        return 0
+
+    return (u1 - u2) / (s+1e-20)
+
+
+def compute_p_values(hist):
     dfs = []
     for key in list(hist.keys())[1:]:
         tmp = {'operator': key}
@@ -132,23 +180,55 @@ def make_stats(hist, display=True):
         dfs.append(pd.DataFrame.from_dict(tmp))
     result = pd.concat(dfs)
 
-    if display:
-        pivot_table = result.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
-        plt.figure()
-        sns.heatmap(pivot_table, annot=True, cmap='coolwarm', linewidths=0.5)
+    return result
+
+
+def compute_effect_size(hist):
+    dfs = []
+    for key in list(hist.keys())[1:]:
+        tmp = {'operator': key}
+        for metric in hist[key]:
+            effect_size = cohend(hist["original"][metric], hist[key][metric])
+            tmp[metric] = [effect_size]
+        dfs.append(pd.DataFrame.from_dict(tmp))
+    result = pd.concat(dfs)
 
     return result
 
 
-def make_multi_stats(hists, mutations):
+def make_multi_stats(hists, mutations, model_name='', p_val_save_path='', effect_size_save_path='', display=True):
     plt.figure(figsize=(15, 8))
     for i, hist in enumerate(hists):
-        res = make_stats(hist, display=False)
-        pivot_table = res.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
+        p_values = compute_p_values(hist)
+        pivot_table = p_values.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
         plt.subplot(2, 3, i + 1)
-        sns.heatmap(pivot_table, annot=True, cmap='coolwarm', linewidths=0.5, cbar=False)
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='flare', linewidths=0.5, cbar=False)
         plt.title(f'mutation ratio = {mutations[i]}')
 
+    plt.suptitle(f'{model_name} p-values')
     plt.subplots_adjust(wspace=0.4, hspace=0.4)
     plt.tight_layout()
-    plt.show()
+
+    if p_val_save_path != '':
+        plt.savefig(p_val_save_path)
+
+    if not display:
+        plt.close()
+
+    plt.figure(figsize=(15, 8))
+    for i, hist in enumerate(hists):
+        effect_sizes = compute_effect_size(hist)
+        pivot_table = effect_sizes.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
+        plt.subplot(2, 3, i + 1)
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='crest', linewidths=0.5, cbar=False)
+        plt.title(f'mutation ratio = {mutations[i]}')
+
+    plt.suptitle(f'{model_name} effect sizes')
+    plt.subplots_adjust(wspace=0.4, hspace=0.4)
+    plt.tight_layout()
+
+    if effect_size_save_path != '':
+        plt.savefig(effect_size_save_path)
+
+    if not display:
+        plt.close()

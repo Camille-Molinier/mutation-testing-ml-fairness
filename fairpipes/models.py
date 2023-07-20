@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
-import tensorflow as tf
 import sklearn
 import numpy as np
+import tensorflow as tf
 
 
 ########################################################################################################################
@@ -42,15 +42,16 @@ class SklearnModel(Model):
 #                                                   Tensorflow model                                                   #
 ########################################################################################################################
 class TensorflowModel(Model):
-    def __init__(self, model, classes):
+    def __init__(self, model, classes, predict_function):
         assert isinstance(model, tf.keras.Model)
         self.model = model
         self.classes = classes
+        self.simple_predict = predict_function
 
     def predict(self, dataframes=[]) -> list:
         predictions = []
 
         for df in dataframes:
-            predictions.append([self.classes[np.argmax(prediction)] for prediction in self.model.predict(df.values)])
+            predictions.append([self.classes[np.argmax(prediction)] for prediction in self.simple_predict(df.values)])
 
         return predictions
