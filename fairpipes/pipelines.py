@@ -58,6 +58,7 @@ def basic_fairness_assessment(
     assert isinstance(model, sklearn.base.BaseEstimator) or isinstance(model, tf.keras.Model), \
         'Type error: model elements should be an instance of <sklearn.base.BaseEstimator> or <tensorflow.keras.Model>'
 
+    # encapsulate model
     if isinstance(model, sklearn.base.BaseEstimator):
         check_is_fitted(model)
         model = SklearnModel(model)
@@ -67,23 +68,27 @@ def basic_fairness_assessment(
             raise AssertionError('Tensorflow model should be fitted')
         model = TensorflowModel(model, y_test.unique())
 
+    # prepare empty history
     history = {'original': {'accuracy': [], 'dpd': [], 'eod': []},
                'column_shuffle': {'accuracy': [], 'dpd': [], 'eod': []},
-               'column_dropping': {'accuracy': [], 'dpd': [], 'eod': []},
+               'column_killing': {'accuracy': [], 'dpd': [], 'eod': []},
                'redistribution': {'accuracy': [], 'dpd': [], 'eod': []},
                'new_class': {'accuracy': [], 'dpd': [], 'eod': []}}
     names = list(history.keys())
 
+    # run nb_iter times the pipeline
     for _ in tqdm(range(nb_iter)):
-
+        # make mutants datasets
         df_shuffle = column_shuffle(X_test, protected_attribute, mutation_ratio)
         df_dropped = column_killing(X_test, protected_attribute)
         df_redistributed = redistribution(X_test, protected_attribute)
         df_new_class = new_class(X_test, protected_attribute, mutation_ratio)
 
+        # compute model prediction for all mutants
         mutants = [X_test, df_shuffle, df_dropped, df_redistributed, df_new_class]
         predictions = model.predict(mutants)
 
+        # store in history
         for i in range(len(predictions)):
             acc = accuracy_score(y_test, predictions[i])
             dpd = demographic_parity_difference(y_true=y_test, y_pred=predictions[i],

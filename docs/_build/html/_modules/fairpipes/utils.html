@@ -193,12 +193,14 @@
         </div>
         <article role="main">
           <h1>Source code for fairpipes.utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">mannwhitneyu</span>
 
 
-<div class="viewcode-block" id="make_fig"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_fig">[docs]</a><span class="k">def</span> <span class="nf">make_fig</span><span class="p">(</span><span class="n">history</span><span class="p">):</span>
+<div class="viewcode-block" id="make_fig"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_fig">[docs]</a><span class="k">def</span> <span class="nf">make_fig</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make figure from simple pipeline assessment.</span>
 
@@ -210,17 +212,25 @@
 <span class="sd">    :param history: dict</span>
 <span class="sd">        history from simple pipeline assessment</span>
 
+<span class="sd">    :param display: bool, default=True</span>
+<span class="sd">        indicate if a figure should be displayed</span>
+
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="s1">&#39;TypeError: history parameter should be an instance of dict&#39;</span>
 
-    <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="c1"># get history operators names</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="c1"># split metrics</span>
     <span class="n">accuracies</span> <span class="o">=</span> <span class="p">[</span><span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
     <span class="n">dpd</span> <span class="o">=</span> <span class="p">[</span><span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;dpd&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
     <span class="n">eod</span> <span class="o">=</span> <span class="p">[</span><span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;eod&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+
     <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
+    <span class="c1"># plot metric with violin plot on boxplot</span>
     <span class="n">sns</span><span class="o">.</span><span class="n">violinplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">accuracies</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">inner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">saturation</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">accuracies</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">boxprops</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;zorder&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)),</span> <span class="n">names</span><span class="p">)</span>
@@ -237,73 +247,100 @@
     <span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">eod</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">boxprops</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;zorder&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
     <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)),</span> <span class="n">names</span><span class="p">)</span>
     <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;eod&#39;</span><span class="p">)</span></div>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;eod&#39;</span><span class="p">)</span>
+
+    <span class="c1"># close if not display constraint</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">display</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="make_history_figs"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_history_figs">[docs]</a><span class="k">def</span> <span class="nf">make_history_figs</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">mutations</span><span class="p">):</span>
+<div class="viewcode-block" id="make_history_figs"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_history_figs">[docs]</a><span class="k">def</span> <span class="nf">make_history_figs</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">mutations</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Make figure from simple pipeline assessment.</span>
+<span class="sd">    Make figure from simple pipeline assessment.</span>
 
-<span class="sd">        Show distributions for each operator with subplots.</span>
+<span class="sd">    Show distributions for each operator with subplots.</span>
 
-<span class="sd">        Each subplot correspond to the average of a metric over all the iteration</span>
+<span class="sd">    Each subplot correspond to the average of a metric over all the iteration</span>
 
-<span class="sd">        .. image:: history_figs.png</span>
-<span class="sd">            :width: 500</span>
+<span class="sd">    .. image:: history_figs.png</span>
+<span class="sd">        :width: 500</span>
 
-<span class="sd">        :param history: list</span>
-<span class="sd">            histories from multiple mutations pipeline assessment</span>
+<span class="sd">    :param history: list</span>
+<span class="sd">        histories from multiple mutations pipeline assessment</span>
 
-<span class="sd">        :param mutations: list</span>
-<span class="sd">            mutation ratios applied in pipeline</span>
+<span class="sd">    :param mutations: list</span>
+<span class="sd">        mutation ratios applied in pipeline</span>
 
-<span class="sd">        :return: None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;TypeError: history parameter should be an instance of list&#39;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mutations</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;TypeError: mutations parameter should be an instance of list&#39;</span>
-    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">mutations</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;TypeError: mutations parameter elements should be instance of float&#39;</span>
+<span class="sd">    :param title: str, default=&#39;&#39;</span>
+<span class="sd">        figure main title</span>
 
+<span class="sd">    :param save_path: str, default=&#39;&#39;</span>
+<span class="sd">        figure export path. If empty, figure won&#39;t be saved</span>
+
+<span class="sd">    :param display: bool, default=True</span>
+<span class="sd">        indicates if figure should be displayed</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># split operators</span>
     <span class="n">original</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]}</span>
     <span class="n">shuffle</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]}</span>
     <span class="n">killing</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]}</span>
     <span class="n">redistribution</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]}</span>
     <span class="n">new_class</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]}</span>
-    <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">shuffle</span><span class="p">,</span> <span class="n">killing</span><span class="p">,</span> <span class="n">redistribution</span><span class="p">,</span> <span class="n">new_class</span><span class="p">]</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;shuffle&#39;</span><span class="p">,</span> <span class="s1">&#39;killing&#39;</span><span class="p">,</span> <span class="s1">&#39;redistribution&#39;</span><span class="p">,</span> <span class="s1">&#39;new_class&#39;</span><span class="p">]</span>
+
+    <span class="c1"># set operators</span>
+    <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">killing</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">new_class</span><span class="p">,</span> <span class="n">redistribution</span><span class="p">]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;column_killing&#39;</span><span class="p">,</span> <span class="s1">&#39;column_shuffle&#39;</span><span class="p">,</span> <span class="s1">&#39;new_class&#39;</span><span class="p">,</span> <span class="s1">&#39;redistribution&#39;</span><span class="p">]</span>
     <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;dpd&#39;</span><span class="p">,</span> <span class="s1">&#39;eod&#39;</span><span class="p">]</span>
 
+    <span class="c1"># transpose values into plotable lists</span>
     <span class="k">for</span> <span class="n">mutation</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
             <span class="n">original</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;original&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;original&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">]))</span>
             <span class="n">shuffle</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;column_shuffle&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;column_shuffle&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">]))</span>
-            <span class="n">killing</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;column_dropping&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;column_dropping&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">]))</span>
+            <span class="n">killing</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;column_killing&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;column_killing&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">]))</span>
             <span class="n">redistribution</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="nb">sum</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;redistribution&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;redistribution&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">]))</span>
             <span class="n">new_class</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;new_class&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">mutation</span><span class="p">[</span><span class="s1">&#39;new_class&#39;</span><span class="p">][</span><span class="n">metric</span><span class="p">]))</span>
 
     <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">datasets</span><span class="p">),</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="c1"># get original value for comparison</span>
+    <span class="n">original_acc</span> <span class="o">=</span> <span class="n">original</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span>
+    <span class="n">original_dpd</span> <span class="o">=</span> <span class="n">original</span><span class="p">[</span><span class="s1">&#39;dpd&#39;</span><span class="p">]</span>
+    <span class="n">original_eod</span> <span class="o">=</span> <span class="n">original</span><span class="p">[</span><span class="s1">&#39;eod&#39;</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">datasets</span><span class="p">):</span>
+        <span class="c1"># avoid matplotlib crazy bug https://stackoverflow.com/questions/58436704/matplotlib-showing-wrong-y-axis-values</span>
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ticklabel_format</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ticklabel_format</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">ticklabel_format</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># get metrics</span>
         <span class="n">accuracy</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span>
         <span class="n">dpd</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dpd&#39;</span><span class="p">]</span>
         <span class="n">eod</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;eod&#39;</span><span class="p">]</span>
 
+        <span class="c1"># plot metric distribution and original value as dashed line</span>
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">accuracy</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">original_acc</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">)</span>
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mutations</span><span class="p">)))</span>
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">mutations</span><span class="p">)</span>
 
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dpd</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">original_dpd</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;dpd&#39;</span><span class="p">)</span>
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mutations</span><span class="p">)))</span>
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">mutations</span><span class="p">)</span>
 
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eod</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">original_eod</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;eod&#39;</span><span class="p">)</span>
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mutations</span><span class="p">)))</span>
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">mutations</span><span class="p">)</span>
 
+        <span class="c1"># set x axis label</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mutations</span><span class="p">)))</span>
             <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">mutations</span><span class="p">)</span>
@@ -316,10 +353,19 @@
 
         <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
+    <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="c1"># save if required</span>
+    <span class="k">if</span> <span class="n">save_path</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">)</span>
+
+    <span class="c1"># close if not display constraint</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">display</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="hist_to_dataframe"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.hist_to_dataframe">[docs]</a><span class="k">def</span> <span class="nf">hist_to_dataframe</span><span class="p">(</span><span class="n">hist</span><span class="p">):</span>
+<div class="viewcode-block" id="hist_to_dataframe"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.hist_to_dataframe">[docs]</a><span class="k">def</span> <span class="nf">hist_to_dataframe</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert history from basic pipeline to pandas dataFrame</span>
 
@@ -327,30 +373,25 @@
 <span class="sd">        basic pipeline result</span>
 
 <span class="sd">    :return: DataFrame</span>
+
 <span class="sd">        columns : metrics for each metrics</span>
+
 <span class="sd">        rows : values over all iterations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="s1">&#39;TypeError: hist parameter should be an instance of dict&#39;</span>
-    <span class="c1"># create empty list</span>
     <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1"># run through all operators</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">hist</span><span class="p">:</span>
-        <span class="c1"># transpose dict to dataframe</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-        <span class="c1"># rename column with &lt;operator&gt;_&lt;metric&gt;</span>
         <span class="n">new_columns</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">new_columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">new_columns</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
-    <span class="c1"># concat all dataframes in one</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="make_multi_hist_dataframe"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_multi_hist_dataframe">[docs]</a><span class="k">def</span> <span class="nf">make_multi_hist_dataframe</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span> <span class="n">mutations</span><span class="p">):</span>
+<div class="viewcode-block" id="make_multi_hist_dataframe"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_multi_hist_dataframe">[docs]</a><span class="k">def</span> <span class="nf">make_multi_hist_dataframe</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span> <span class="n">mutations</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert history from basic pipeline to pandas dataFrame</span>
 
@@ -360,27 +401,206 @@
 <span class="sd">    :param mutations: list</span>
 <span class="sd">        mutation ration applied in pipeline</span>
 
-<span class="sd">    :return: DataFrame</span>
-<span class="sd">        columns : metrics for each metrics and mutation ratio</span>
+<span class="sd">    :return: pandas DataFrame</span>
+
+<span class="sd">        columns : metrics for each operator and mutation ratio</span>
+
 <span class="sd">        rows : values over all iterations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># create empty list</span>
     <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># run through histories</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">histories</span><span class="p">):</span>
-        <span class="c1"># convert history to dataframe</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">hist_to_dataframe</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
-        <span class="c1"># append columns names with corresponding mutation ration</span>
         <span class="n">new_columns</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">new_columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">mutations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">new_columns</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-    <span class="c1"># concatenate dataframes along columns</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="make_stats"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_stats">[docs]</a><span class="k">def</span> <span class="nf">make_stats</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute p-values and effect sizes from history</span>
+
+<span class="sd">    :param hist: dict</span>
+<span class="sd">        history from simple pipeline</span>
+
+<span class="sd">    :param display: bool, default=True</span>
+<span class="sd">        indicate if figure should be displayed</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">        p-values : computed p-values matrix</span>
+
+<span class="sd">        effect_sizes : computed effect_sizes matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># compute stats</span>
+    <span class="n">p_values</span> <span class="o">=</span> <span class="n">compute_p_values</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+    <span class="n">effect_sizes</span> <span class="o">=</span> <span class="n">compute_effect_size</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+
+    <span class="c1"># display if required</span>
+    <span class="k">if</span> <span class="n">display</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">pivot_table</span> <span class="o">=</span> <span class="n">p_values</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;operator&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;dpd&#39;</span><span class="p">,</span> <span class="s1">&#39;eod&#39;</span><span class="p">])</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot_table</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;flare&#39;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;p_values&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">pivot_table</span> <span class="o">=</span> <span class="n">effect_sizes</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;operator&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;dpd&#39;</span><span class="p">,</span> <span class="s1">&#39;eod&#39;</span><span class="p">])</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot_table</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;flare&#39;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;effect_sizes&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">p_values</span><span class="p">,</span> <span class="n">effect_sizes</span></div>
+
+
+<div class="viewcode-block" id="cohend"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.cohend">[docs]</a><span class="k">def</span> <span class="nf">cohend</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute Cohen&#39;s d coefficient</span>
+
+<span class="sd">    :param d1: list</span>
+<span class="sd">        first distribution</span>
+
+<span class="sd">    :param d2: list</span>
+<span class="sd">        second distribution</span>
+
+<span class="sd">    :return: Cohen&#39;s d coefficient as float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">d1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
+    <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">n1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">s1</span> <span class="o">+</span> <span class="p">(</span><span class="n">n2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">s2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n1</span> <span class="o">+</span> <span class="n">n2</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">u1</span><span class="p">,</span> <span class="n">u2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">d1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
+
+    <span class="c1"># resolve special cases with same mean and 0 standard deviation (same flat distribution) by returning 0</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">u1</span> <span class="o">-</span> <span class="n">u2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># resolve special cases 0 standard deviation but not same mean (so divided by 0 error) by adding small epsilon</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">u1</span> <span class="o">-</span> <span class="n">u2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">s</span><span class="o">+</span><span class="mf">1e-20</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="compute_p_values"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.compute_p_values">[docs]</a><span class="k">def</span> <span class="nf">compute_p_values</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute p-values matrix from history</span>
+
+<span class="sd">    :param hist: dict</span>
+<span class="sd">        history from simple pipeline</span>
+
+<span class="sd">    :return: Dataframe</span>
+
+<span class="sd">        rows : operators</span>
+
+<span class="sd">        columns : metrics</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">hist</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">hist</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">mannwhitneyu</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s2">&quot;original&quot;</span><span class="p">][</span><span class="n">metric</span><span class="p">],</span> <span class="n">hist</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">]</span>
+        <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">tmp</span><span class="p">))</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="compute_effect_size"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.compute_effect_size">[docs]</a><span class="k">def</span> <span class="nf">compute_effect_size</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute effect size matrix from history</span>
+
+<span class="sd">    :param hist: dict</span>
+<span class="sd">        history from simple pipeline</span>
+
+<span class="sd">    :return: Dataframe</span>
+
+<span class="sd">        rows : operators</span>
+
+<span class="sd">        columns : metrics</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">hist</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">hist</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="n">effect_size</span> <span class="o">=</span> <span class="n">cohend</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s2">&quot;original&quot;</span><span class="p">][</span><span class="n">metric</span><span class="p">],</span> <span class="n">hist</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">effect_size</span><span class="p">]</span>
+        <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">tmp</span><span class="p">))</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="make_multi_stats"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_multi_stats">[docs]</a><span class="k">def</span> <span class="nf">make_multi_stats</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span>
+                     <span class="n">mutations</span><span class="p">,</span>
+                     <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                     <span class="n">p_val_save_path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                     <span class="n">effect_size_save_path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                     <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute p-values and effect sizes from multiple mutation pipeline</span>
+
+<span class="sd">        .. image:: p-values.png</span>
+<span class="sd">            :width: 500</span>
+
+<span class="sd">        .. image:: effect_sizes.png</span>
+<span class="sd">            :width: 500</span>
+
+<span class="sd">    :param hists: list</span>
+<span class="sd">        histories from multiple mutation pipeline</span>
+
+<span class="sd">    :param mutations: list</span>
+<span class="sd">        applied mutation to the pipeline</span>
+
+<span class="sd">    :param model_name: str, default=&#39;&#39;</span>
+<span class="sd">        assessed model name</span>
+
+<span class="sd">    :param p_val_save_path: str, default=&#39;&#39;</span>
+<span class="sd">        p-values figure save path. If empty, figure won&#39;t be saved</span>
+
+<span class="sd">    :param effect_size_save_path: str, default=&#39;&#39;</span>
+<span class="sd">        effect_size figure save path. If empty, figure won&#39;t be saved</span>
+
+<span class="sd">    :param display: bool, default=True</span>
+<span class="sd">        indicate if figure should be displayed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hists</span><span class="p">):</span>
+        <span class="n">p_values</span> <span class="o">=</span> <span class="n">compute_p_values</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+        <span class="n">pivot_table</span> <span class="o">=</span> <span class="n">p_values</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;operator&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;dpd&#39;</span><span class="p">,</span> <span class="s1">&#39;eod&#39;</span><span class="p">])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot_table</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;flare&#39;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mutation ratio = </span><span class="si">{</span><span class="n">mutations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1"> p-values&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">p_val_save_path</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">p_val_save_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">display</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hists</span><span class="p">):</span>
+        <span class="n">effect_sizes</span> <span class="o">=</span> <span class="n">compute_effect_size</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+        <span class="n">pivot_table</span> <span class="o">=</span> <span class="n">effect_sizes</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;operator&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;dpd&#39;</span><span class="p">,</span> <span class="s1">&#39;eod&#39;</span><span class="p">])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot_table</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;crest&#39;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mutation ratio = </span><span class="si">{</span><span class="n">mutations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1"> effect sizes&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">effect_size_save_path</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">effect_size_save_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">display</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 </pre></div>
         </article>
       </div>

@@ -195,9 +195,9 @@
           <h1>Source code for fairpipes.models</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">import</span> <span class="nn">sklearn</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -237,16 +237,17 @@
 <span class="c1">#                                                   Tensorflow model                                                   #</span>
 <span class="c1">########################################################################################################################</span>
 <div class="viewcode-block" id="TensorflowModel"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.models.TensorflowModel">[docs]</a><span class="k">class</span> <span class="nc">TensorflowModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">predict_function</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="n">classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simple_predict</span> <span class="o">=</span> <span class="n">predict_function</span>
 
 <div class="viewcode-block" id="TensorflowModel.predict"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.models.TensorflowModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframes</span><span class="o">=</span><span class="p">[])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="n">predictions</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">dataframes</span><span class="p">:</span>
-            <span class="n">predictions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">prediction</span><span class="p">)]</span> <span class="k">for</span> <span class="n">prediction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">)])</span>
+            <span class="n">predictions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">prediction</span><span class="p">)]</span> <span class="k">for</span> <span class="n">prediction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simple_predict</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">)])</span>
 
         <span class="k">return</span> <span class="n">predictions</span></div></div>
 </pre></div>
