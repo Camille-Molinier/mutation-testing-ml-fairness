@@ -3,8 +3,8 @@ import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from fairpipes.pipelines import multi_mutation_fairness_assessment
-from fairpipes.utils import make_history_figs, make_multi_hist_dataframe, make_multi_stats
+from fairpipes.pipelines import multi_mutation_fairness_assessment, basic_fairness_assessment
+from fairpipes.utils import make_history_figs, make_multi_hist_dataframe, make_multi_stats, make_fig
 
 from sklearn.svm import SVC
 from xgboost import XGBClassifier
@@ -52,7 +52,18 @@ def main():
     knn_opt = KNeighborsClassifier(n_neighbors=6, algorithm='kd_tree', p=1)
 
     # pipeline configuration
-    models = [dt, dt_opt, rf, rf_opt, xgbc, xgbc_opt, ada, ada_opt, knn, knn_opt]
+    models = [dt,
+              dt_opt,
+              rf,
+              rf_opt,
+              xgbc,
+              xgbc_opt,
+              ada,
+              ada_opt,
+              knn,
+              knn_opt
+              ]
+
     names = ['Decision_tree',
              'Decision_tree_optimized',
              'Random_forest',
@@ -62,7 +73,8 @@ def main():
              'AdaBoost',
              'AdaBoost_optimized',
              'KNN',
-             'KNN_optimized']
+             'KNN_optimized'
+             ]
     mutations = [0.1, 0.2, 0.3, 0.4, 0.5]
     protected_attribute = 'marital-status'
     nb_iter = 50
@@ -94,15 +106,15 @@ def main():
         make_history_figs(hist,
                           mutations,
                           title=f'Adult {names[i]} operators response',
-                          save_path=f'./dat/fig/adult/{protected_attribute}/{names[i]}/history.png',
+                          save_path=f'{save_path}/history.png',
                           display=False)
 
         # compute p-values and effect sizes
         make_multi_stats(hist,
                          mutations,
                          model_name=f'{names[i]}',
-                         p_val_save_path=f'./dat/fig/adult/{protected_attribute}/{names[i]}/p-values.png',
-                         effect_size_save_path=f'./dat/fig/adult/{protected_attribute}/{names[i]}/effect_sizes.png',
+                         p_val_save_path=f'{save_path}/p-values.png',
+                         effect_size_save_path=f'{save_path}/effect_sizes.png',
                          display=False)
 
         # save raw history in csv format

@@ -23,8 +23,24 @@ def make_fig(history, display=True) -> None:
     :return: None
     """
 
+    assert isinstance(history, dict), 'TypeError: history parameter should be an instance of dict'
+    assert isinstance(display, bool), 'TypeError: display parameter should be an instance of bool'
+    assert sorted(list(history.keys())) == \
+           sorted(['original', 'column_shuffle', 'column_killing', 'redistribution', 'new_class']), \
+        "KeyError: history keys should be operators 'original', 'column_shuffle', 'column_killing', 'redistribution' " \
+        "and 'new_class'"
+
+    for key in list(history.keys()):
+        assert sorted(list(history[key].keys())) == sorted(['accuracy', 'dpd', 'eod']), \
+            "KeyError: history keys should have accuracy, dpd and eod metrics"
+        for metric in history[key]:
+            assert isinstance(history[key][metric], list), 'TypeError: metrics keys should be an instance of list'
+            for element in history[key][metric]:
+                assert isinstance(element, float), 'TypeError: metrics elements should be instance of float'
+
     # get history operators names
     names = list(history.keys())
+    print(names)
     # split metrics
     accuracies = [history[key]['accuracy'] for key in names]
     dpd = [history[key]['dpd'] for key in names]
@@ -283,7 +299,7 @@ def cohend(d1, d2) -> float:
         return 0
 
     # resolve special cases 0 standard deviation but not same mean (so divided by 0 error) by adding small epsilon
-    return (u1 - u2) / (s+1e-20)
+    return (u1 - u2) / (s + 1e-20)
 
 
 def compute_p_values(hist) -> pd.DataFrame:
@@ -374,7 +390,7 @@ def make_multi_stats(hists,
         p_values = compute_p_values(hist)
         pivot_table = p_values.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
         plt.subplot(2, 3, i + 1)
-        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='flare', linewidths=0.5, cbar=False)
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='turbo', linewidths=0.5, cbar=False) # flare
         plt.title(f'mutation ratio = {mutations[i]}')
 
     plt.suptitle(f'{model_name} p-values')
@@ -392,7 +408,7 @@ def make_multi_stats(hists,
         effect_sizes = compute_effect_size(hist)
         pivot_table = effect_sizes.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
         plt.subplot(2, 3, i + 1)
-        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='crest', linewidths=0.5, cbar=False)
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='turbo', linewidths=0.5, cbar=False) #crest
         plt.title(f'mutation ratio = {mutations[i]}')
 
     plt.suptitle(f'{model_name} effect sizes')
