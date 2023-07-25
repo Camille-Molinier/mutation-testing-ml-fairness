@@ -22,25 +22,11 @@ def make_fig(history, display=True) -> None:
 
     :return: None
     """
-
-    assert isinstance(history, dict), 'TypeError: history parameter should be an instance of dict'
+    __is_valid_history(history)
     assert isinstance(display, bool), 'TypeError: display parameter should be an instance of bool'
-    assert sorted(list(history.keys())) == \
-           sorted(['original', 'column_shuffle', 'column_killing', 'redistribution', 'new_class']), \
-        "KeyError: history keys should be operators 'original', 'column_shuffle', 'column_killing', 'redistribution' " \
-        "and 'new_class'"
-
-    for key in list(history.keys()):
-        assert sorted(list(history[key].keys())) == sorted(['accuracy', 'dpd', 'eod']), \
-            "KeyError: history keys should have accuracy, dpd and eod metrics"
-        for metric in history[key]:
-            assert isinstance(history[key][metric], list), 'TypeError: metrics keys should be an instance of list'
-            for element in history[key][metric]:
-                assert isinstance(element, float), 'TypeError: metrics elements should be instance of float'
 
     # get history operators names
     names = list(history.keys())
-    print(names)
     # split metrics
     accuracies = [history[key]['accuracy'] for key in names]
     dpd = [history[key]['dpd'] for key in names]
@@ -101,6 +87,15 @@ def make_history_figs(history, mutations, title='', save_path='', display=True) 
 
     :return: None
     """
+    __is_valid_history(history)
+    assert isinstance(display, bool), 'TypeError: display parameter should be an instance of bool'
+    assert isinstance(title, str), 'TypeError: title parameter should be an instance of str'
+    assert isinstance(save_path, str), 'TypeError: save_path parameter should be an instance of str'
+    assert isinstance(mutations, list), 'TypeError: mutations parameter should be an instance of list'
+    for mutation in mutations:
+        assert isinstance(mutation, float), 'TypeError: mutations elements should be instance of float'
+        assert 0 <= mutation <= 1, 'ValueError: mutation ratios should be in range [0, 1]'
+
     # split operators
     original = {'accuracy': [], 'dpd': [], 'eod': []}
     shuffle = {'accuracy': [], 'dpd': [], 'eod': []}
@@ -184,11 +179,11 @@ def make_history_figs(history, mutations, title='', save_path='', display=True) 
         plt.close()
 
 
-def hist_to_dataframe(hist) -> pd.DataFrame:
+def hist_to_dataframe(history) -> pd.DataFrame:
     """
     Convert history from basic pipeline to pandas dataFrame
 
-    :param hist: dict
+    :param history: dict
         basic pipeline result
 
     :return: DataFrame
@@ -197,9 +192,11 @@ def hist_to_dataframe(hist) -> pd.DataFrame:
 
         rows : values over all iterations
     """
+    __is_valid_history(history)
+
     dfs = []
-    for key in hist:
-        df = pd.DataFrame.from_dict(hist[key])
+    for key in history:
+        df = pd.DataFrame.from_dict(history[key])
         new_columns = {}
         for col in df.columns:
             new_columns[col] = f'{key}_{col}'
@@ -226,6 +223,14 @@ def make_multi_hist_dataframe(histories, mutations) -> pd.DataFrame:
 
         rows : values over all iterations
     """
+    for history in histories:
+        __is_valid_history(history)
+
+    assert isinstance(mutations, list), 'TypeError: mutations parameter should be an instance of list'
+    for mutation in mutations:
+        assert isinstance(mutation, float), 'TypeError: mutations elements should be instance of float'
+        assert 0 <= mutation <= 1, 'ValueError: mutation ratios should be in range [0, 1]'
+
     dfs = []
     for i, hist in enumerate(histories):
         df = hist_to_dataframe(hist)
@@ -238,11 +243,11 @@ def make_multi_hist_dataframe(histories, mutations) -> pd.DataFrame:
     return result
 
 
-def make_stats(hist, display=True) -> tuple:
+def make_stats(history, display=True) -> tuple:
     """
     Compute p-values and effect sizes from history
 
-    :param hist: dict
+    :param history: dict
         history from simple pipeline
 
     :param display: bool, default=True
@@ -253,9 +258,12 @@ def make_stats(hist, display=True) -> tuple:
 
         effect_sizes : computed effect_sizes matrix
     """
+    __is_valid_history(history)
+    assert isinstance(display, bool), 'TypeError: display parameter should be an instance of bool'
+
     # compute stats
-    p_values = compute_p_values(hist)
-    effect_sizes = compute_effect_size(hist)
+    p_values = compute_p_values(history)
+    effect_sizes = compute_effect_size(history)
 
     # display if required
     if display:
@@ -282,13 +290,22 @@ def cohend(d1, d2) -> float:
     Compute Cohen's d coefficient
 
     :param d1: list
-        first distribution
+        first distribution of floats in range [0, 1]
 
     :param d2: list
-        second distribution
+        second distribution of floats in range [0, 1]
 
     :return: Cohen's d coefficient as float
     """
+    assert isinstance(d1, list), 'TypeError: d1 parameter should be an instance of list'
+    assert isinstance(d2, list), 'TypeError: d2 parameter should be an instance of list'
+    assert len(d1) == len(d2), 'SizeError: d1 and d2 parameters should have same length'
+    for i in range(len(d1)):
+        assert isinstance(d1[i], float), 'TypeError, d1 elements should be instance of float'
+        assert isinstance(d2[i], float), 'TypeError, d2 elements should be instance of float'
+        assert 0 <= d1[i] <= 1, 'ValueError: d1 elements should be in range [0, 1]'
+        assert 0 <= d2[i] <= 1, 'ValueError: d2 elements should be in range [0, 1]'
+
     n1, n2 = len(d1), len(d2)
     s1, s2 = np.var(d1, ddof=1), np.var(d2, ddof=1)
     s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
@@ -302,11 +319,11 @@ def cohend(d1, d2) -> float:
     return (u1 - u2) / (s + 1e-20)
 
 
-def compute_p_values(hist) -> pd.DataFrame:
+def compute_p_values(history) -> pd.DataFrame:
     """
     Compute p-values matrix from history
 
-    :param hist: dict
+    :param history: dict
         history from simple pipeline
 
     :return: Dataframe
@@ -315,11 +332,13 @@ def compute_p_values(hist) -> pd.DataFrame:
 
         columns : metrics
     """
+    __is_valid_history(history)
+
     dfs = []
-    for key in list(hist.keys())[1:]:
+    for key in list(history.keys())[1:]:
         tmp = {'operator': key}
-        for metric in hist[key]:
-            _, p = mannwhitneyu(hist["original"][metric], hist[key][metric])
+        for metric in history[key]:
+            _, p = mannwhitneyu(history["original"][metric], history[key][metric])
             tmp[metric] = [p]
         dfs.append(pd.DataFrame.from_dict(tmp))
     result = pd.concat(dfs)
@@ -327,11 +346,11 @@ def compute_p_values(hist) -> pd.DataFrame:
     return result
 
 
-def compute_effect_size(hist) -> pd.DataFrame:
+def compute_effect_size(history) -> pd.DataFrame:
     """
     Compute effect size matrix from history
 
-    :param hist: dict
+    :param history: dict
         history from simple pipeline
 
     :return: Dataframe
@@ -340,11 +359,13 @@ def compute_effect_size(hist) -> pd.DataFrame:
 
         columns : metrics
     """
+    __is_valid_history(history)
+
     dfs = []
-    for key in list(hist.keys())[1:]:
+    for key in list(history.keys())[1:]:
         tmp = {'operator': key}
-        for metric in hist[key]:
-            effect_size = cohend(hist["original"][metric], hist[key][metric])
+        for metric in history[key]:
+            effect_size = cohend(history["original"][metric], history[key][metric])
             tmp[metric] = [effect_size]
         dfs.append(pd.DataFrame.from_dict(tmp))
     result = pd.concat(dfs)
@@ -352,7 +373,7 @@ def compute_effect_size(hist) -> pd.DataFrame:
     return result
 
 
-def make_multi_stats(hists,
+def make_multi_stats(histories,
                      mutations,
                      model_name='',
                      p_val_save_path='',
@@ -367,7 +388,7 @@ def make_multi_stats(hists,
         .. image:: effect_sizes.png
             :width: 500
 
-    :param hists: list
+    :param histories: list
         histories from multiple mutation pipeline
 
     :param mutations: list
@@ -385,12 +406,26 @@ def make_multi_stats(hists,
     :param display: bool, default=True
         indicate if figure should be displayed
     """
+    for history in histories:
+        __is_valid_history(history)
+
+    assert isinstance(mutations, list), 'TypeError: mutations parameter should be an instance of list'
+    for mutation in mutations:
+        assert isinstance(mutation, float), 'TypeError: mutations elements should be instance of float'
+        assert 0 <= mutation <= 1, 'ValueError: mutation ratios should be in range [0, 1]'
+
+    assert isinstance(model_name, str), 'TypeError: model_name parameter should be an instance of str'
+    assert isinstance(p_val_save_path, str), 'TypeError: p_val_save_path parameter should be an instance of str'
+    assert isinstance(effect_size_save_path, str), \
+        'TypeError: effect_size_save_path parameter should be an instance of str'
+    assert isinstance(display, bool), 'TypeError: display parameter should be an instance of bool'
+
     plt.figure(figsize=(15, 8))
-    for i, hist in enumerate(hists):
+    for i, hist in enumerate(histories):
         p_values = compute_p_values(hist)
         pivot_table = p_values.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
         plt.subplot(2, 3, i + 1)
-        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='turbo', linewidths=0.5, cbar=False) # flare
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='turbo', linewidths=0.5, cbar=False)  # flare
         plt.title(f'mutation ratio = {mutations[i]}')
 
     plt.suptitle(f'{model_name} p-values')
@@ -404,11 +439,11 @@ def make_multi_stats(hists,
         plt.close()
 
     plt.figure(figsize=(15, 8))
-    for i, hist in enumerate(hists):
+    for i, hist in enumerate(histories):
         effect_sizes = compute_effect_size(hist)
         pivot_table = effect_sizes.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
         plt.subplot(2, 3, i + 1)
-        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='turbo', linewidths=0.5, cbar=False) #crest
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='turbo', linewidths=0.5, cbar=False)  # crest
         plt.title(f'mutation ratio = {mutations[i]}')
 
     plt.suptitle(f'{model_name} effect sizes')
@@ -420,3 +455,34 @@ def make_multi_stats(hists,
 
     if not display:
         plt.close()
+
+
+def __is_valid_history(history) -> None:
+    """
+    ⚠️ This function is not meant to be used outside fairpipes.utils
+
+    Check if history come from a fairpipes pipeline
+
+    Assert each keys ['original', 'column_shuffle', 'column_killing', 'redistribution', 'new_class'] are in and each
+    metrics ['accuracy', 'dpd', 'eod'] too.
+
+    Check if all list associates to metrics contains only floats in range [0, 1]
+
+    :param history: history to examinate
+
+    :return: None
+    """
+    assert isinstance(history, dict), 'TypeError: history parameter should be an instance of dict'
+    assert sorted(list(history.keys())) == \
+           sorted(['original', 'column_shuffle', 'column_killing', 'redistribution', 'new_class']), \
+        "KeyError: history keys should be operators 'original', 'column_shuffle', 'column_killing', 'redistribution' " \
+        "and 'new_class'"
+
+    for key in list(history.keys()):
+        assert sorted(list(history[key].keys())) == sorted(['accuracy', 'dpd', 'eod']), \
+            "KeyError: history keys should have accuracy, dpd and eod metrics"
+        for metric in history[key]:
+            assert isinstance(history[key][metric], list), 'TypeError: metrics keys should be an instance of list'
+            for element in history[key][metric]:
+                assert isinstance(element, float), 'TypeError: metrics elements should be instance of float'
+                assert 0 <= element <= 1, f'ValueError: {metric} value should be in range [0, 1]'
