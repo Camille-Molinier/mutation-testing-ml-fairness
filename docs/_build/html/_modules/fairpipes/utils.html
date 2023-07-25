@@ -217,8 +217,8 @@
 
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="s1">&#39;TypeError: history parameter should be an instance of dict&#39;</span>
+    <span class="n">__is_valid_history</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span> <span class="s1">&#39;TypeError: display parameter should be an instance of bool&#39;</span>
 
     <span class="c1"># get history operators names</span>
     <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -282,6 +282,15 @@
 
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__is_valid_history</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span> <span class="s1">&#39;TypeError: display parameter should be an instance of bool&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;TypeError: title parameter should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;TypeError: save_path parameter should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mutations</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;TypeError: mutations parameter should be an instance of list&#39;</span>
+    <span class="k">for</span> <span class="n">mutation</span> <span class="ow">in</span> <span class="n">mutations</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mutation</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;TypeError: mutations elements should be instance of float&#39;</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">mutation</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;ValueError: mutation ratios should be in range [0, 1]&#39;</span>
+
     <span class="c1"># split operators</span>
     <span class="n">original</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]}</span>
     <span class="n">shuffle</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dpd&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;eod&#39;</span><span class="p">:</span> <span class="p">[]}</span>
@@ -365,11 +374,11 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="hist_to_dataframe"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.hist_to_dataframe">[docs]</a><span class="k">def</span> <span class="nf">hist_to_dataframe</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="hist_to_dataframe"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.hist_to_dataframe">[docs]</a><span class="k">def</span> <span class="nf">hist_to_dataframe</span><span class="p">(</span><span class="n">history</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert history from basic pipeline to pandas dataFrame</span>
 
-<span class="sd">    :param hist: dict</span>
+<span class="sd">    :param history: dict</span>
 <span class="sd">        basic pipeline result</span>
 
 <span class="sd">    :return: DataFrame</span>
@@ -378,9 +387,11 @@
 
 <span class="sd">        rows : values over all iterations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__is_valid_history</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+
     <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">hist</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
         <span class="n">new_columns</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">new_columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -407,6 +418,14 @@
 
 <span class="sd">        rows : values over all iterations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">history</span> <span class="ow">in</span> <span class="n">histories</span><span class="p">:</span>
+        <span class="n">__is_valid_history</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mutations</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;TypeError: mutations parameter should be an instance of list&#39;</span>
+    <span class="k">for</span> <span class="n">mutation</span> <span class="ow">in</span> <span class="n">mutations</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mutation</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;TypeError: mutations elements should be instance of float&#39;</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">mutation</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;ValueError: mutation ratios should be in range [0, 1]&#39;</span>
+
     <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">histories</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">hist_to_dataframe</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
@@ -419,11 +438,11 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="make_stats"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_stats">[docs]</a><span class="k">def</span> <span class="nf">make_stats</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="make_stats"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_stats">[docs]</a><span class="k">def</span> <span class="nf">make_stats</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute p-values and effect sizes from history</span>
 
-<span class="sd">    :param hist: dict</span>
+<span class="sd">    :param history: dict</span>
 <span class="sd">        history from simple pipeline</span>
 
 <span class="sd">    :param display: bool, default=True</span>
@@ -434,9 +453,12 @@
 
 <span class="sd">        effect_sizes : computed effect_sizes matrix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__is_valid_history</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span> <span class="s1">&#39;TypeError: display parameter should be an instance of bool&#39;</span>
+
     <span class="c1"># compute stats</span>
-    <span class="n">p_values</span> <span class="o">=</span> <span class="n">compute_p_values</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
-    <span class="n">effect_sizes</span> <span class="o">=</span> <span class="n">compute_effect_size</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+    <span class="n">p_values</span> <span class="o">=</span> <span class="n">compute_p_values</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+    <span class="n">effect_sizes</span> <span class="o">=</span> <span class="n">compute_effect_size</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
 
     <span class="c1"># display if required</span>
     <span class="k">if</span> <span class="n">display</span><span class="p">:</span>
@@ -463,13 +485,22 @@
 <span class="sd">    Compute Cohen&#39;s d coefficient</span>
 
 <span class="sd">    :param d1: list</span>
-<span class="sd">        first distribution</span>
+<span class="sd">        first distribution of floats in range [0, 1]</span>
 
 <span class="sd">    :param d2: list</span>
-<span class="sd">        second distribution</span>
+<span class="sd">        second distribution of floats in range [0, 1]</span>
 
 <span class="sd">    :return: Cohen&#39;s d coefficient as float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;TypeError: d1 parameter should be an instance of list&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;TypeError: d2 parameter should be an instance of list&#39;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">d1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">d2</span><span class="p">),</span> <span class="s1">&#39;SizeError: d1 and d2 parameters should have same length&#39;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">d1</span><span class="p">)):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;TypeError, d1 elements should be instance of float&#39;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d2</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;TypeError, d2 elements should be instance of float&#39;</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">d1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;ValueError: d1 elements should be in range [0, 1]&#39;</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">d2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;ValueError: d2 elements should be in range [0, 1]&#39;</span>
+
     <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">d1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
     <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">n1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">s1</span> <span class="o">+</span> <span class="p">(</span><span class="n">n2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">s2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n1</span> <span class="o">+</span> <span class="n">n2</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
@@ -480,14 +511,14 @@
         <span class="k">return</span> <span class="mi">0</span>
 
     <span class="c1"># resolve special cases 0 standard deviation but not same mean (so divided by 0 error) by adding small epsilon</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">u1</span> <span class="o">-</span> <span class="n">u2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">s</span><span class="o">+</span><span class="mf">1e-20</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">u1</span> <span class="o">-</span> <span class="n">u2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">s</span> <span class="o">+</span> <span class="mf">1e-20</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="compute_p_values"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.compute_p_values">[docs]</a><span class="k">def</span> <span class="nf">compute_p_values</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="compute_p_values"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.compute_p_values">[docs]</a><span class="k">def</span> <span class="nf">compute_p_values</span><span class="p">(</span><span class="n">history</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute p-values matrix from history</span>
 
-<span class="sd">    :param hist: dict</span>
+<span class="sd">    :param history: dict</span>
 <span class="sd">        history from simple pipeline</span>
 
 <span class="sd">    :return: Dataframe</span>
@@ -496,11 +527,13 @@
 
 <span class="sd">        columns : metrics</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__is_valid_history</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+
     <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">hist</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">1</span><span class="p">:]:</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">1</span><span class="p">:]:</span>
         <span class="n">tmp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">}</span>
-        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">hist</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">mannwhitneyu</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s2">&quot;original&quot;</span><span class="p">][</span><span class="n">metric</span><span class="p">],</span> <span class="n">hist</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">mannwhitneyu</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;original&quot;</span><span class="p">][</span><span class="n">metric</span><span class="p">],</span> <span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
             <span class="n">tmp</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">]</span>
         <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">tmp</span><span class="p">))</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
@@ -508,11 +541,11 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="compute_effect_size"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.compute_effect_size">[docs]</a><span class="k">def</span> <span class="nf">compute_effect_size</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="compute_effect_size"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.compute_effect_size">[docs]</a><span class="k">def</span> <span class="nf">compute_effect_size</span><span class="p">(</span><span class="n">history</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute effect size matrix from history</span>
 
-<span class="sd">    :param hist: dict</span>
+<span class="sd">    :param history: dict</span>
 <span class="sd">        history from simple pipeline</span>
 
 <span class="sd">    :return: Dataframe</span>
@@ -521,11 +554,13 @@
 
 <span class="sd">        columns : metrics</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__is_valid_history</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+
     <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">hist</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">1</span><span class="p">:]:</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">1</span><span class="p">:]:</span>
         <span class="n">tmp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">}</span>
-        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">hist</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
-            <span class="n">effect_size</span> <span class="o">=</span> <span class="n">cohend</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s2">&quot;original&quot;</span><span class="p">][</span><span class="n">metric</span><span class="p">],</span> <span class="n">hist</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="n">effect_size</span> <span class="o">=</span> <span class="n">cohend</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;original&quot;</span><span class="p">][</span><span class="n">metric</span><span class="p">],</span> <span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
             <span class="n">tmp</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">effect_size</span><span class="p">]</span>
         <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">tmp</span><span class="p">))</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
@@ -533,7 +568,7 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="make_multi_stats"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_multi_stats">[docs]</a><span class="k">def</span> <span class="nf">make_multi_stats</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span>
+<div class="viewcode-block" id="make_multi_stats"><a class="viewcode-back" href="../../fairpipes.html#fairpipes.utils.make_multi_stats">[docs]</a><span class="k">def</span> <span class="nf">make_multi_stats</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span>
                      <span class="n">mutations</span><span class="p">,</span>
                      <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                      <span class="n">p_val_save_path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
@@ -548,7 +583,7 @@
 <span class="sd">        .. image:: effect_sizes.png</span>
 <span class="sd">            :width: 500</span>
 
-<span class="sd">    :param hists: list</span>
+<span class="sd">    :param histories: list</span>
 <span class="sd">        histories from multiple mutation pipeline</span>
 
 <span class="sd">    :param mutations: list</span>
@@ -566,12 +601,26 @@
 <span class="sd">    :param display: bool, default=True</span>
 <span class="sd">        indicate if figure should be displayed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">history</span> <span class="ow">in</span> <span class="n">histories</span><span class="p">:</span>
+        <span class="n">__is_valid_history</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mutations</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;TypeError: mutations parameter should be an instance of list&#39;</span>
+    <span class="k">for</span> <span class="n">mutation</span> <span class="ow">in</span> <span class="n">mutations</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mutation</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;TypeError: mutations elements should be instance of float&#39;</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">mutation</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;ValueError: mutation ratios should be in range [0, 1]&#39;</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;TypeError: model_name parameter should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p_val_save_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;TypeError: p_val_save_path parameter should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">effect_size_save_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> \
+        <span class="s1">&#39;TypeError: effect_size_save_path parameter should be an instance of str&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span> <span class="s1">&#39;TypeError: display parameter should be an instance of bool&#39;</span>
+
     <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hists</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">histories</span><span class="p">):</span>
         <span class="n">p_values</span> <span class="o">=</span> <span class="n">compute_p_values</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
         <span class="n">pivot_table</span> <span class="o">=</span> <span class="n">p_values</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;operator&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;dpd&#39;</span><span class="p">,</span> <span class="s1">&#39;eod&#39;</span><span class="p">])</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot_table</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;flare&#39;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot_table</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># flare</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mutation ratio = </span><span class="si">{</span><span class="n">mutations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1"> p-values&#39;</span><span class="p">)</span>
@@ -585,11 +634,11 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hists</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">histories</span><span class="p">):</span>
         <span class="n">effect_sizes</span> <span class="o">=</span> <span class="n">compute_effect_size</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
         <span class="n">pivot_table</span> <span class="o">=</span> <span class="n">effect_sizes</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;operator&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;dpd&#39;</span><span class="p">,</span> <span class="s1">&#39;eod&#39;</span><span class="p">])</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot_table</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;crest&#39;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot_table</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># crest</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mutation ratio = </span><span class="si">{</span><span class="n">mutations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1"> effect sizes&#39;</span><span class="p">)</span>
@@ -601,6 +650,37 @@
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">display</span><span class="p">:</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<span class="k">def</span> <span class="nf">__is_valid_history</span><span class="p">(</span><span class="n">history</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ⚠️ This function is not meant to be used outside fairpipes.utils</span>
+
+<span class="sd">    Check if history come from a fairpipes pipeline</span>
+
+<span class="sd">    Assert each keys [&#39;original&#39;, &#39;column_shuffle&#39;, &#39;column_killing&#39;, &#39;redistribution&#39;, &#39;new_class&#39;] are in and each</span>
+<span class="sd">    metrics [&#39;accuracy&#39;, &#39;dpd&#39;, &#39;eod&#39;] too.</span>
+
+<span class="sd">    Check if all list associates to metrics contains only floats in range [0, 1]</span>
+
+<span class="sd">    :param history: history to examinate</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="s1">&#39;TypeError: history parameter should be an instance of dict&#39;</span>
+    <span class="k">assert</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span> <span class="o">==</span> \
+           <span class="nb">sorted</span><span class="p">([</span><span class="s1">&#39;original&#39;</span><span class="p">,</span> <span class="s1">&#39;column_shuffle&#39;</span><span class="p">,</span> <span class="s1">&#39;column_killing&#39;</span><span class="p">,</span> <span class="s1">&#39;redistribution&#39;</span><span class="p">,</span> <span class="s1">&#39;new_class&#39;</span><span class="p">]),</span> \
+        <span class="s2">&quot;KeyError: history keys should be operators &#39;original&#39;, &#39;column_shuffle&#39;, &#39;column_killing&#39;, &#39;redistribution&#39; &quot;</span> \
+        <span class="s2">&quot;and &#39;new_class&#39;&quot;</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">assert</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span> <span class="o">==</span> <span class="nb">sorted</span><span class="p">([</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;dpd&#39;</span><span class="p">,</span> <span class="s1">&#39;eod&#39;</span><span class="p">]),</span> \
+            <span class="s2">&quot;KeyError: history keys should have accuracy, dpd and eod metrics&quot;</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">metric</span><span class="p">],</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;TypeError: metrics keys should be an instance of list&#39;</span>
+            <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">metric</span><span class="p">]:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;TypeError: metrics elements should be instance of float&#39;</span>
+                <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">element</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;ValueError: </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s1"> value should be in range [0, 1]&#39;</span>
 </pre></div>
         </article>
       </div>

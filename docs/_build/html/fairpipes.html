@@ -430,9 +430,9 @@ pandas DataFrames list to predictions</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>d1</strong> – list
-first distribution</p></li>
+first distribution of floats in range [0, 1]</p></li>
 <li><p><strong>d2</strong> – list
-second distribution</p></li>
+second distribution of floats in range [0, 1]</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -443,11 +443,11 @@ second distribution</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fairpipes.utils.compute_effect_size">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">compute_effect_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/utils.html#compute_effect_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.compute_effect_size" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">compute_effect_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/utils.html#compute_effect_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.compute_effect_size" title="Permalink to this definition">#</a></dt>
 <dd><p>Compute effect size matrix from history</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>hist</strong> – dict
+<dd class="field-odd"><p><strong>history</strong> – dict
 history from simple pipeline</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -461,11 +461,11 @@ history from simple pipeline</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fairpipes.utils.compute_p_values">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">compute_p_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/utils.html#compute_p_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.compute_p_values" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">compute_p_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/utils.html#compute_p_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.compute_p_values" title="Permalink to this definition">#</a></dt>
 <dd><p>Compute p-values matrix from history</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>hist</strong> – dict
+<dd class="field-odd"><p><strong>history</strong> – dict
 history from simple pipeline</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -479,11 +479,11 @@ history from simple pipeline</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fairpipes.utils.hist_to_dataframe">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">hist_to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/utils.html#hist_to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.hist_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">hist_to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/fairpipes/utils.html#hist_to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.hist_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert history from basic pipeline to pandas dataFrame</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>hist</strong> – dict
+<dd class="field-odd"><p><strong>history</strong> – dict
 basic pipeline result</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -568,7 +568,7 @@ mutation ration applied in pipeline</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fairpipes.utils.make_multi_stats">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">make_multi_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hists</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_val_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_size_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/fairpipes/utils.html#make_multi_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.make_multi_stats" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">make_multi_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">histories</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_val_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_size_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/fairpipes/utils.html#make_multi_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.make_multi_stats" title="Permalink to this definition">#</a></dt>
 <dd><p>Compute p-values and effect sizes from multiple mutation pipeline</p>
 <blockquote>
 <div><a class="reference internal image-reference" href="_images/p-values.png"><img alt="_images/p-values.png" src="_images/p-values.png" style="width: 500px;" /></a>
@@ -577,7 +577,7 @@ mutation ration applied in pipeline</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>hists</strong> – list
+<li><p><strong>histories</strong> – list
 histories from multiple mutation pipeline</p></li>
 <li><p><strong>mutations</strong> – list
 applied mutation to the pipeline</p></li>
@@ -596,12 +596,12 @@ indicate if figure should be displayed</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fairpipes.utils.make_stats">
-<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">make_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/fairpipes/utils.html#make_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.make_stats" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fairpipes.utils.</span></span><span class="sig-name descname"><span class="pre">make_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/fairpipes/utils.html#make_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairpipes.utils.make_stats" title="Permalink to this definition">#</a></dt>
 <dd><p>Compute p-values and effect sizes from history</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>hist</strong> – dict
+<li><p><strong>history</strong> – dict
 history from simple pipeline</p></li>
 <li><p><strong>display</strong> – bool, default=True
 indicate if figure should be displayed</p></li>
