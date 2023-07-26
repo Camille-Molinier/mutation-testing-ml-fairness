@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import sklearn
 import numpy as np
 import tensorflow as tf
+from sklearn.utils.validation import check_is_fitted
 
 
 ########################################################################################################################
@@ -27,6 +28,7 @@ class Model(ABC):
 class SklearnModel(Model):
     def __init__(self, model):
         assert isinstance(model, sklearn.base.BaseEstimator)
+        check_is_fitted(model)
         self.model = model
 
     def predict(self, dataframes=[]) -> list:
@@ -44,6 +46,9 @@ class SklearnModel(Model):
 class TensorflowModel(Model):
     def __init__(self, model, classes, predict_function):
         assert isinstance(model, tf.keras.Model)
+        if model.history is None:
+            raise AssertionError('Tensorflow model should be fitted')
+
         self.model = model
         self.classes = classes
         self.simple_predict = predict_function

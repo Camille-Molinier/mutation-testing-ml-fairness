@@ -60,12 +60,9 @@ def basic_fairness_assessment(
 
     # encapsulate model
     if isinstance(model, sklearn.base.BaseEstimator):
-        check_is_fitted(model)
         model = SklearnModel(model)
 
     else:
-        if model.history is None:
-            raise AssertionError('Tensorflow model should be fitted')
         model = TensorflowModel(model, y_test.unique())
 
     # prepare empty history
