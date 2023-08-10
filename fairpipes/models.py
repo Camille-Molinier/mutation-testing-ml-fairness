@@ -32,21 +32,18 @@ class SklearnModel(Model):
         self.model = model
 
     def predict(self, dataframes=[]) -> list:
-        predictions = []
-
-        for df in dataframes:
-            predictions.append(self.model.predict(df))
-
-        return predictions
+        return [self.model.predict(df) for df in dataframes]
 
 
 ########################################################################################################################
 #                                                   Tensorflow model                                                   #
 ########################################################################################################################
 class TensorflowModel(Model):
-    def __init__(self, model, classes, predict_function):
+    def __init__(self, model, classes, predict_function=None):
         assert isinstance(model, tf.keras.Model)
-        if model.history is None:
+        try:
+            all([w is not None for w in model.get_weights()])
+        except:
             raise AssertionError('Tensorflow model should be fitted')
 
         self.model = model
@@ -57,6 +54,16 @@ class TensorflowModel(Model):
         predictions = []
 
         for df in dataframes:
-            predictions.append([self.classes[np.argmax(prediction)] for prediction in self.simple_predict(df.values)])
-
+            if self.simple_predict is not None:
+                predictions.append(
+                    [self.classes[np.argmax(prediction)] for prediction in self.simple_predict(df.values)])
+            else:
+                predictions.append(
+                    [self.classes[np.argmax(prediction)] for prediction in self.__simple_predict(df.values)])
         return predictions
+
+    def __simple_predict(self, df):
+        y_pred_prob = self.model.predict(df, verbose=0)
+        y_pred = (tf.nn.sigmoid(y_pred_prob) > 0.5).numpy()
+        y_pred = y_pred.reshape(y_pred.shape[0], ).astype(int)
+        return y_pred

@@ -59,7 +59,7 @@ def make_fig(history, display=True) -> None:
         plt.close()
 
 
-def make_history_figs(history, mutations, title='', save_path='', display=True) -> None:
+def make_history_figs(histories, mutations, title='', save_path='', display=True) -> None:
     """
     Make figure from simple pipeline assessment.
 
@@ -70,7 +70,7 @@ def make_history_figs(history, mutations, title='', save_path='', display=True) 
     .. image:: history_figs.png
         :width: 500
 
-    :param history: list
+    :param histories: list
         histories from multiple mutations pipeline assessment
 
     :param mutations: list
@@ -87,7 +87,8 @@ def make_history_figs(history, mutations, title='', save_path='', display=True) 
 
     :return: None
     """
-    __is_valid_history(history)
+    for history in histories:
+        __is_valid_history(history)
     assert isinstance(display, bool), 'TypeError: display parameter should be an instance of bool'
     assert isinstance(title, str), 'TypeError: title parameter should be an instance of str'
     assert isinstance(save_path, str), 'TypeError: save_path parameter should be an instance of str'
@@ -109,7 +110,7 @@ def make_history_figs(history, mutations, title='', save_path='', display=True) 
     metrics = ['accuracy', 'dpd', 'eod']
 
     # transpose values into plotable lists
-    for mutation in history:
+    for mutation in histories:
         for metric in metrics:
             original[metric].append(sum(mutation['original'][metric]) / len(mutation['original'][metric]))
             shuffle[metric].append(sum(mutation['column_shuffle'][metric]) / len(mutation['column_shuffle'][metric]))
@@ -276,7 +277,7 @@ def make_stats(history, display=True) -> tuple:
 
         plt.subplot(1, 2, 2)
         pivot_table = effect_sizes.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
-        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='flare', linewidths=0.5, cbar=False)
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='crest', linewidths=0.5, cbar=False)
         plt.title('effect_sizes')
 
         plt.subplots_adjust(wspace=0.4, hspace=1)
@@ -369,7 +370,7 @@ def compute_effect_size(history) -> pd.DataFrame:
             tmp[metric] = [effect_size]
         dfs.append(pd.DataFrame.from_dict(tmp))
     result = pd.concat(dfs)
-
+    result[['accuracy', 'dpd', 'eod']] = result[['accuracy', 'dpd', 'eod']].abs()
     return result
 
 
@@ -425,7 +426,7 @@ def make_multi_stats(histories,
         p_values = compute_p_values(hist)
         pivot_table = p_values.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
         plt.subplot(2, 3, i + 1)
-        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='turbo', linewidths=0.5, cbar=False)  # flare
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='flare', linewidths=0.5, cbar=False)  # flare
         plt.title(f'mutation ratio = {mutations[i]}')
 
     plt.suptitle(f'{model_name} p-values')
@@ -443,7 +444,7 @@ def make_multi_stats(histories,
         effect_sizes = compute_effect_size(hist)
         pivot_table = effect_sizes.pivot_table(index='operator', values=['accuracy', 'dpd', 'eod'])
         plt.subplot(2, 3, i + 1)
-        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='turbo', linewidths=0.5, cbar=False)  # crest
+        sns.heatmap(pivot_table, vmin=0, vmax=1, annot=True, cmap='crest', linewidths=0.5, cbar=False)  # crest
         plt.title(f'mutation ratio = {mutations[i]}')
 
     plt.suptitle(f'{model_name} effect sizes')
@@ -486,3 +487,4 @@ def __is_valid_history(history) -> None:
             for element in history[key][metric]:
                 assert isinstance(element, float), 'TypeError: metrics elements should be instance of float'
                 assert 0 <= element <= 1, f'ValueError: {metric} value should be in range [0, 1]'
+

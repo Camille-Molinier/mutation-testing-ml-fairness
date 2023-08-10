@@ -31,7 +31,7 @@ def column_shuffle(dataframe, protected_attribute, shuffle_ratio=0.0) -> pd.Data
         'Type error: protected_attributes elements should be an instance of str'
     assert protected_attribute in dataframe.columns, \
         'Key error: protected_attribute elements should be in dataframe columns'
-    assert type(shuffle_ratio) == float, 'Type error: protected_attributes should be an instance of float'
+    assert type(shuffle_ratio) == float, 'Type error: shuffle_ratio should be an instance of float'
     assert 0 <= shuffle_ratio <= 1, 'Value error: shuffle_ratio should be in range(0,1)'
 
     # copy dataframe to manipulate it safely
@@ -177,7 +177,7 @@ def duplication_mutation(dataframe, protected_attribute, duplication_ratio=0.0) 
         'Type error: protected_attributes elements should be an instance of str'
     assert protected_attribute in dataframe.columns, \
         'Key error: protected_attribute elements should be in dataframe columns'
-    assert type(duplication_ratio) == float, 'Type error: protected_attributes should be an instance of float'
+    assert type(duplication_ratio) == float, 'Type error: duplication_ratio should be an instance of float'
     assert 0 <= duplication_ratio <= 1, 'Value error: shuffle_ratio should be in range(0,1)'
 
     # copy dataframe to manipulate it safely
@@ -246,7 +246,7 @@ def new_class(dataframe, protected_attribute, mutation_ratio=0.0, new_value='nul
         'Type error: protected_attributes elements should be an instance of str'
     assert protected_attribute in dataframe.columns, \
         'Key error: protected_attribute elements should be in dataframe columns'
-    assert type(mutation_ratio) == float, 'Type error: protected_attributes should be an instance of float'
+    assert type(mutation_ratio) == float, 'Type error: mutation_ratio should be an instance of float'
     assert 0 <= mutation_ratio <= 1, 'Value error: shuffle_ratio should be in range(0,1)'
 
     # copy dataframe to manipulate it safely
